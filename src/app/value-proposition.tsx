@@ -10,8 +10,8 @@ import { TypographyH3, TypographyP } from "@src/components/ui/typography";
 
 export const ValueProposition = () => {
 	return (
-		<main className="w-5/6 max-w-5xl flex flex-col gap-8 items-center text-center">
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 w-full">
+		<main className="w-5/6 max-w-5xl flex flex-col gap-8 mt-10 items-center text-center">
+			<div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
 				<Card className="backdrop-blur-sm rounded-lg p-6 border border-secondary/10 shadow-sm">
 					<div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
 						{/* w-12 h-12 bg-primary/10 rounded-lg justify-center mb-4 */}
