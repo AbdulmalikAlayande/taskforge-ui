@@ -16,10 +16,10 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
 	return (
 		<div className={cn("flex flex-col gap-6", className)} {...props}>
-			<Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+			<Card className="border-0 shadow-lg p-6 border-secondary/10 backdrop-blur-sm">
 				<CardHeader className="text-center pb-8">
 					<CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-					<CardDescription className="text-secondary/70 text-base">
+					<CardDescription className="text-base">
 						Login with your Apple or Google account
 					</CardDescription>
 				</CardHeader>
@@ -29,7 +29,7 @@ export function LoginForm({
 							<div className="flex flex-col gap-4">
 								<Button
 									variant="outline"
-									className="w-full border-2 border-secondary/20 hover:border-secondary/40 hover:bg-secondary/5 text-secondary font-medium h-12 transition-all duration-200"
+									className="w-full border-2 border-secondary/20 hover:border-secondary/40 hover:bg-secondary/5 text-shadow-primary-foreground font-medium h-12 transition-all duration-200"
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
