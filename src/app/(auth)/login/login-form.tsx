@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useSession } from "next-auth/react";
 import { Label } from "@src/components/ui/label";
 import { Button } from "@src/components/ui/button";
 import {
@@ -19,7 +20,6 @@ import { Input } from "@src/components/ui/input";
 import Link from "next/link";
 import Logger from "@src/lib/logger";
 import { login } from "@src/lib/actions/auth-options";
-import { auth } from "@src/lib/auth";
 
 const loginSchema = z.object({
 	email: z
@@ -41,12 +41,16 @@ export function LoginForm({
 	const [isLoading, setIsLoading] = useState(false);
 	const [socialLoading, setSocialLoading] = useState<string | null>(null);
 
-	const session = auth();
+	const { data: session, status } = useSession();
 
 	useEffect(() => {
-		Logger.debug(`Session1:: ${session}`);
-		console.debug(`Session1:: ${session}`);
-	});
+		Logger.debug(`Session status: ${status}`);
+		if (session) {
+			Logger.debug(`Session data:`, session);
+			console.debug(`Session data:`, session);
+		}
+		console.debug(`Session status: ${status}`);
+	}, [session, status]);
 
 	const {
 		register,
@@ -78,9 +82,10 @@ export function LoginForm({
 		setSocialLoading(provider);
 		try {
 			Logger.info(`Logging in with ${provider}`);
-
+			console.log(`Logging in with ${provider}`);
 			const result = login(provider);
 			Logger.info(`result ${result}`);
+			console.log(`result ${result}`);
 		} catch (error) {
 			Logger.error(`${provider} login error:: ${error}`);
 		} finally {
