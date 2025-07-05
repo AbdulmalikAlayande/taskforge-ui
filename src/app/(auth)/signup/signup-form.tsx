@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -87,6 +87,18 @@ export function SignupForm({
 	const router = useRouter();
 	const { storeUserData } = useUserStorage();
 
+	// Track active loading toast to ensure cleanup
+	const loadingToastRef = useRef<string | number | null>(null);
+
+	// Cleanup loading toasts when component unmounts
+	useEffect(() => {
+		return () => {
+			if (loadingToastRef.current) {
+				toast.dismiss(loadingToastRef.current);
+			}
+		};
+	}, []);
+
 	const {
 		register,
 		handleSubmit,
@@ -113,24 +125,21 @@ export function SignupForm({
 
 	const onSubmit: SubmitHandler<SignupFormData> = async (data) => {
 		setIsLoading(true);
+		let loadingToast: string | number | null = null;
 
 		try {
-			const loadingToast = toast.loading("Creating your account...");
+			loadingToast = toast.loading("Creating your account...");
 
 			const response = await apiClient.post<UserResponse, SignupFormData>(
-				`${process.env.NEXT_PUBLIC_API_URL}/members/create-new`,
-				{
-					firstName: data.firstName,
-					lastName: data.lastName,
-					email: data.email,
-					password: data.password,
-					confirmPassword: data.confirmPassword,
-					acceptTerms: data.acceptTerms,
-					marketingEmails: data.marketingEmails,
-				}
+				`${process.env.NEXT_PUBLIC_API_URL!}/admin/create-new`,
+				data
 			);
 
-			toast.dismiss(loadingToast);
+			// Dismiss loading toast immediately after API response
+			if (loadingToast) {
+				toast.dismiss(loadingToast);
+				loadingToast = null;
+			}
 
 			if (response?.publicId) {
 				storeUserData(response);
@@ -147,13 +156,21 @@ export function SignupForm({
 					email: data.email,
 				});
 
+				// Dismiss all toasts before navigation to prevent persistence
 				setTimeout(() => {
+					toast.dismiss(); // Dismiss all toasts
 					router.push(`/onboarding/organization?userId=${response.publicId}`);
 				}, 1500);
 			} else {
 				throw new Error("Invalid response from server");
 			}
 		} catch (error: unknown) {
+			// Always dismiss loading toast in error case
+			if (loadingToast) {
+				toast.dismiss(loadingToast);
+				loadingToast = null;
+			}
+
 			const errorMessage =
 				error instanceof Error ? error.message : "Unknown error occurred";
 			Logger.error("Signup error:", { error: errorMessage });
@@ -179,6 +196,10 @@ export function SignupForm({
 				});
 			}
 		} finally {
+			// Ensure loading toast is dismissed and loading state is reset
+			if (loadingToast) {
+				toast.dismiss(loadingToast);
+			}
 			setIsLoading(false);
 		}
 	};
