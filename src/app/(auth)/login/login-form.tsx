@@ -82,10 +82,8 @@ export function LoginForm({
 		setSocialLoading(provider);
 		try {
 			Logger.info(`Logging in with ${provider}`);
-			console.log(`Logging in with ${provider}`);
 			const result = login(provider);
 			Logger.info(`result ${result}`);
-			console.log(`result ${result}`);
 		} catch (error) {
 			Logger.error(`${provider} login error:: ${error}`);
 		} finally {
