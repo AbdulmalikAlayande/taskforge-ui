@@ -52,11 +52,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 		}),
 	],
 
-	debug: true, // Enable debug mode for better error reporting
-	
+	debug: true,
+
 	pages: {
-		signIn: '/login', // Custom sign in page
-		error: '/auth/error', // Custom error page  
+		signIn: "/login",
+		error: "/auth/error",
 	},
 
 	callbacks: {

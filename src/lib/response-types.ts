@@ -1,7 +1,15 @@
+enum Role {
+	ORGANIZATION_MEMBER = "ORGANIZATION_MEMBER",
+	ORGANIZATION_ADMIN = "ORGANIZATION_ADMIN",
+	ORGANIZATION_OWNER = "ORGANIZATION_OWNER",
+}
+
 export interface UserResponse {
+	role: Role;
 	publicId: string;
+	organizationId: string;
 	email: string;
-	fistname: string;
+	firstname: string;
 	lastname: string;
 	image?: string;
 	createdAt: string;

@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { toast } from "sonner";
 import { Label } from "@src/components/ui/label";
 import { Button } from "@src/components/ui/button";
 import {
@@ -26,6 +29,9 @@ import { Input } from "@src/components/ui/input";
 import { Checkbox } from "@src/components/ui/checkbox";
 import Link from "next/link";
 import Logger from "@src/lib/logger";
+import { UserResponse } from "@src/lib/response-types";
+import { useUserStorage } from "@src/app/hooks/useUserStorage";
+import { useApiClient } from "@src/app/hooks/useApiClient";
 
 // Zod schema for form validation
 const signupSchema = z
@@ -77,12 +83,17 @@ export function SignupForm({
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+	const apiClient = useApiClient();
+	const router = useRouter();
+	const { storeUserData } = useUserStorage();
+
 	const {
 		register,
 		handleSubmit,
 		formState: { errors, isSubmitting },
 		watch,
 		setValue,
+		reset,
 	} = useForm<SignupFormData>({
 		resolver: zodResolver(signupSchema),
 		defaultValues: {
@@ -102,12 +113,71 @@ export function SignupForm({
 
 	const onSubmit: SubmitHandler<SignupFormData> = async (data) => {
 		setIsLoading(true);
+
 		try {
-			await new Promise((resolve) => setTimeout(resolve, 2000));
-			console.log("Signup data:", data);
-			// Handle successful signup here
-		} catch (error) {
-			console.error("Signup error:", error);
+			const loadingToast = toast.loading("Creating your account...");
+
+			const response = await apiClient.post<UserResponse, SignupFormData>(
+				`${process.env.NEXT_PUBLIC_API_URL}/members/create-new`,
+				{
+					firstName: data.firstName,
+					lastName: data.lastName,
+					email: data.email,
+					password: data.password,
+					confirmPassword: data.confirmPassword,
+					acceptTerms: data.acceptTerms,
+					marketingEmails: data.marketingEmails,
+				}
+			);
+
+			toast.dismiss(loadingToast);
+
+			if (response?.publicId) {
+				storeUserData(response);
+
+				toast.success("Account created successfully!", {
+					description: "Welcome to TaskForge! Let's set up your organization.",
+					duration: 3000,
+				});
+
+				reset();
+
+				Logger.info("User successfully signed up", {
+					userId: response.publicId,
+					email: data.email,
+				});
+
+				setTimeout(() => {
+					router.push(`/onboarding/organization?userId=${response.publicId}`);
+				}, 1500);
+			} else {
+				throw new Error("Invalid response from server");
+			}
+		} catch (error: unknown) {
+			const errorMessage =
+				error instanceof Error ? error.message : "Unknown error occurred";
+			Logger.error("Signup error:", { error: errorMessage });
+
+			const apiError = error as { status?: number; message?: string };
+
+			if (apiError?.status === 409) {
+				toast.error("Account already exists", {
+					description:
+						"An account with this email already exists. Please try logging in instead.",
+					action: {
+						label: "Sign In",
+						onClick: () => router.push("/login"),
+					},
+				});
+			} else if (apiError?.status === 422) {
+				toast.error("Invalid data", {
+					description: "Please check your information and try again.",
+				});
+			} else if (!apiError?.status) {
+				toast.error("Connection failed", {
+					description: "Please check your internet connection and try again.",
+				});
+			}
 		} finally {
 			setIsLoading(false);
 		}
@@ -115,12 +185,38 @@ export function SignupForm({
 
 	const handleSocialSignup = async (provider: string) => {
 		setSocialLoading(provider);
+
 		try {
-			Logger.info(`Signing up with ${provider}`);
-			await new Promise((resolve) => setTimeout(resolve, 1500));
-			// Handle social signup here
+			Logger.info(`Initiating ${provider} signup`);
+
+			// Store the intent to track if this is a signup flow
+			sessionStorage.setItem("auth_intent", "signup");
+			sessionStorage.setItem("auth_provider", provider);
+
+			// Use NextAuth signIn with callback URL for post-auth routing
+			const result = await signIn(provider, {
+				callbackUrl: "/onboarding/organization",
+				redirect: false,
+			});
+
+			if (result?.error) {
+				toast.error(`${provider} signup failed`, {
+					description:
+						result.error === "AccessDenied"
+							? "Access was denied. Please try again or contact support."
+							: "Something went wrong. Please try again.",
+				});
+				Logger.error(`${provider} signup error:`, { error: result.error });
+			} else if (result?.url) {
+				toast.success("Redirecting...", {
+					description: `Signing up with ${provider}`,
+				});
+			}
 		} catch (error) {
 			console.error(`${provider} signup error:`, error);
+			toast.error(`${provider} signup failed`, {
+				description: "An unexpected error occurred. Please try again.",
+			});
 		} finally {
 			setSocialLoading(null);
 		}
@@ -141,6 +237,7 @@ export function SignupForm({
 					<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 						{/* Social Signup Buttons */}
 						<div className="flex flex-col gap-3">
+							{" "}
 							<Button
 								type="button"
 								variant="outline"
@@ -159,10 +256,10 @@ export function SignupForm({
 								type="button"
 								variant="outline"
 								className="w-full border border-border hover:border-border/80 hover:bg-accent/50 text-foreground font-medium h-12 transition-all duration-200"
-								onClick={() => handleSocialSignup("google")}
-								disabled={socialLoading === "google"}
+								onClick={() => handleSocialSignup("facebook")}
+								disabled={socialLoading === "facebook"}
 							>
-								{socialLoading === "google" ? (
+								{socialLoading === "facebook" ? (
 									<div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
 								) : (
 									<FaMeta className="w-5 h-5" />
@@ -173,10 +270,10 @@ export function SignupForm({
 								type="button"
 								variant="outline"
 								className="w-full border border-border hover:border-border/80 hover:bg-accent/50 text-foreground font-medium h-12 transition-all duration-200"
-								onClick={() => handleSocialSignup("google")}
-								disabled={socialLoading === "google"}
+								onClick={() => handleSocialSignup("apple")}
+								disabled={socialLoading === "apple"}
 							>
-								{socialLoading === "google" ? (
+								{socialLoading === "apple" ? (
 									<div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
 								) : (
 									<FaApple className="w-5 h-5" />
