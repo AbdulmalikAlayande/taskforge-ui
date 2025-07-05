@@ -52,6 +52,13 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 		}),
 	],
 
+	debug: true, // Enable debug mode for better error reporting
+	
+	pages: {
+		signIn: '/login', // Custom sign in page
+		error: '/auth/error', // Custom error page  
+	},
+
 	callbacks: {
 		async signIn({ user, account }) {
 			try {
