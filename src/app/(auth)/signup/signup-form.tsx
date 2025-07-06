@@ -5,7 +5,6 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 import { Label } from "@src/components/ui/label";
 import { Button } from "@src/components/ui/button";
@@ -32,6 +31,7 @@ import Logger from "@src/lib/logger";
 import { UserResponse } from "@src/lib/response-types";
 import { useUserStorage } from "@src/app/hooks/useUserStorage";
 import { useApiClient } from "@src/app/hooks/useApiClient";
+import { signIn } from "next-auth/react";
 
 // Zod schema for form validation
 const signupSchema = z
@@ -135,7 +135,6 @@ export function SignupForm({
 				data
 			);
 
-			// Dismiss loading toast immediately after API response
 			if (loadingToast) {
 				toast.dismiss(loadingToast);
 				loadingToast = null;
@@ -156,16 +155,14 @@ export function SignupForm({
 					email: data.email,
 				});
 
-				// Dismiss all toasts before navigation to prevent persistence
 				setTimeout(() => {
-					toast.dismiss(); // Dismiss all toasts
+					toast.dismiss();
 					router.push(`/onboarding/organization?userId=${response.publicId}`);
 				}, 1500);
 			} else {
 				throw new Error("Invalid response from server");
 			}
 		} catch (error: unknown) {
-			// Always dismiss loading toast in error case
 			if (loadingToast) {
 				toast.dismiss(loadingToast);
 				loadingToast = null;
@@ -196,7 +193,6 @@ export function SignupForm({
 				});
 			}
 		} finally {
-			// Ensure loading toast is dismissed and loading state is reset
 			if (loadingToast) {
 				toast.dismiss(loadingToast);
 			}
@@ -210,28 +206,27 @@ export function SignupForm({
 		try {
 			Logger.info(`Initiating ${provider} signup`);
 
-			// Store the intent to track if this is a signup flow
+			// Store intent in sessionStorage for post-auth handling
 			sessionStorage.setItem("auth_intent", "signup");
 			sessionStorage.setItem("auth_provider", provider);
 
-			// Use NextAuth signIn with callback URL for post-auth routing
+			// Use NextAuth's client-side signIn
 			const result = await signIn(provider, {
-				callbackUrl: "/onboarding/organization",
+				callbackUrl: "/auth/success",
 				redirect: false,
 			});
 
 			if (result?.error) {
+				Logger.error(`${provider} signup error:`, { error: result.error });
 				toast.error(`${provider} signup failed`, {
 					description:
 						result.error === "AccessDenied"
-							? "Access was denied. Please try again or contact support."
-							: "Something went wrong. Please try again.",
+							? "Access was denied. Please try again."
+							: "An unexpected error occurred. Please try again.",
 				});
-				Logger.error(`${provider} signup error:`, { error: result.error });
 			} else if (result?.url) {
-				toast.success("Redirecting...", {
-					description: `Signing up with ${provider}`,
-				});
+				// Redirect manually since we used redirect: false
+				window.location.href = result.url;
 			}
 		} catch (error) {
 			console.error(`${provider} signup error:`, error);

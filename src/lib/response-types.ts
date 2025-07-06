@@ -1,4 +1,4 @@
-enum Role {
+export enum Role {
 	ORGANIZATION_MEMBER = "ORGANIZATION_MEMBER",
 	ORGANIZATION_ADMIN = "ORGANIZATION_ADMIN",
 	ORGANIZATION_OWNER = "ORGANIZATION_OWNER",
@@ -28,6 +28,20 @@ export interface Task {
 	updatedAt: string;
 }
 
+export interface CountryAndTimezone {
+	status: string;
+	message: string;
+	zones: [
+		{
+			countryCode: string;
+			countryName: string;
+			zoneName: string;
+			gmtOffset: number;
+			timestamp: number;
+		},
+	];
+}
+
 export interface ApiResponse<T> {
 	data: T;
 	message?: string;
@@ -46,6 +60,13 @@ export interface PaginatedResponse<T> {
 		total: number;
 		totalPages: number;
 	};
+}
+
+export interface OrganizationResponse {
+	publicId: string;
+	name: string;
+	email: string;
+	slug: string;
 }
 
 export interface ApiErrorResponse {

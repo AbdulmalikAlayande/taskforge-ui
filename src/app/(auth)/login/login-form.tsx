@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useSession } from "next-auth/react";
 import { Label } from "@src/components/ui/label";
 import { Button } from "@src/components/ui/button";
 import {
@@ -19,7 +18,8 @@ import { cn } from "@src/lib/utils";
 import { Input } from "@src/components/ui/input";
 import Link from "next/link";
 import Logger from "@src/lib/logger";
-import { login } from "@src/lib/actions/auth-options";
+import { toast } from "sonner";
+import { signIn } from "next-auth/react";
 
 const loginSchema = z.object({
 	email: z
@@ -40,17 +40,6 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [socialLoading, setSocialLoading] = useState<string | null>(null);
-
-	const { data: session, status } = useSession();
-
-	useEffect(() => {
-		Logger.debug(`Session status: ${status}`);
-		if (session) {
-			Logger.debug(`Session data:`, session);
-			console.debug(`Session data:`, session);
-		}
-		console.debug(`Session status: ${status}`);
-	}, [session, status]);
 
 	const {
 		register,
@@ -81,11 +70,35 @@ export function LoginForm({
 	const handleSocialLogin = async (provider: string) => {
 		setSocialLoading(provider);
 		try {
-			Logger.info(`Logging in with ${provider}`);
-			const result = login(provider);
-			Logger.info(`result ${result}`);
+			Logger.info(`Initiating ${provider} login`);
+
+			// Store intent in sessionStorage for post-auth handling
+			sessionStorage.setItem("auth_intent", "login");
+			sessionStorage.setItem("auth_provider", provider);
+
+			// Use NextAuth's client-side signIn
+			const result = await signIn(provider, {
+				callbackUrl: "/auth/success",
+				redirect: false,
+			});
+
+			if (result?.error) {
+				Logger.error(`${provider} login error:`, { error: result.error });
+				toast.error(`${provider} login failed`, {
+					description:
+						result.error === "AccessDenied"
+							? "Access was denied. Please try again."
+							: "An unexpected error occurred. Please try again.",
+				});
+			} else if (result?.url) {
+				// Redirect manually since we used redirect: false
+				window.location.href = result.url;
+			}
 		} catch (error) {
-			Logger.error(`${provider} login error:: ${error}`);
+			Logger.error(`${provider} login error:`, { error });
+			toast.error(`${provider} login failed`, {
+				description: "An unexpected error occurred. Please try again.",
+			});
 		} finally {
 			setSocialLoading(null);
 		}

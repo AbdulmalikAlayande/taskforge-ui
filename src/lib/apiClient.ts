@@ -129,13 +129,13 @@ class ApiClient {
 
 	// This helps me set the authorization header
 	setAuthHeader(token: string) {
-		this.client.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+		this.client.defaults.headers.common.Authorization = `Bearer ${token}`;
 		Logger.debug("Auth header set");
 	}
 
 	// the removes the authorization header
 	removeAuthHeader() {
-		delete this.client.defaults.headers.common["Authorization"];
+		delete this.client.defaults.headers.common.Authorization;
 		Logger.debug("Auth header removed");
 	}
 

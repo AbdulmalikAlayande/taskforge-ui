@@ -66,7 +66,7 @@ export default function AuthError() {
 					<p className="text-sm text-gray-600">{getErrorMessage(error)}</p>
 
 					{getDebugInfo(error).length > 0 && (
-						<div className="bg-gray-100 p-3 rounded text-xs">
+						<div className="p-3 rounded text-xs">
 							<p className="font-semibold mb-2">Debug Information:</p>
 							<ul className="space-y-1">
 								{getDebugInfo(error).map((info, index) => (

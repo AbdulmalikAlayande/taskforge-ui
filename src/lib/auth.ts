@@ -1,35 +1,40 @@
-import NextAuth, { type DefaultSession } from "next-auth";
+import NextAuth from "next-auth";
 import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import Apple from "next-auth/providers/apple";
 import Meta from "next-auth/providers/facebook";
-import { apiClient } from "./apiClient";
 import { UserResponse } from "./response-types";
+import { OAuthRequest } from "./request-types";
+import { apiClient } from "./apiClient";
 import Logger from "./logger";
-
 declare module "next-auth" {
 	interface Session {
 		accessToken?: string;
 		backendToken?: string;
+		provider?: string;
 		user: {
 			id: string;
-		} & DefaultSession["user"];
+			email?: string | null;
+			name?: string | null;
+			image?: string | null;
+		} & UserResponse;
+	}
+
+	interface User {
+		id: string;
+		email?: string | null;
+		name?: string | null;
+		image?: string | null;
+		backendId?: string;
+		backendData?: UserResponse;
 	}
 
 	interface JWT {
+		backendId?: string;
+		backendData?: UserResponse;
+		provider?: string;
 		accessToken?: string;
-		backendToken?: string;
-		backendUserId?: string;
 	}
-}
-
-interface OAuthRequest {
-	email: string;
-	firstname: string;
-	lastname: string;
-	image: string;
-	provider: string;
-	providerId: string;
 }
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
@@ -52,95 +57,180 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 		}),
 	],
 
-	debug: true,
-
-	pages: {
-		signIn: "/login",
-		error: "/auth/error",
-	},
-
 	callbacks: {
 		async signIn({ user, account }) {
 			try {
-				if (
-					!user?.email ||
-					!user?.name ||
-					!account?.provider ||
-					!account?.providerAccountId
-				) {
-					Logger.error("Missing required OAuth data");
+				Logger.info(`OAuth signIn attempt with ${account?.provider}`, {
+					email: user.email,
+					provider: account?.provider,
+					hasEmail: !!user?.email,
+					hasName: !!user?.name,
+				});
+
+				if (!user?.email) {
+					Logger.error("Missing email from OAuth provider", { user, account });
 					return false;
 				}
 
-				const [firstname, ...lastnameParts] = user.name.split(" ");
-				const lastname = lastnameParts.join(" ") || firstname;
+				// Allow sign in even without name - we'll generate it
+				let lastname: string = "";
+				let firstname: string = "";
+				let lastnameParts: string[] = [];
+
+				if (user.name) {
+					[firstname, ...lastnameParts] = user.name.split(" ");
+					lastname = lastnameParts.join(" ") || "";
+				} else {
+					// Generate name from email if not provided
+					firstname = user.email.split("@")[0];
+					lastname = "";
+				}
+
+				const oauthData: OAuthRequest = {
+					email: user.email,
+					firstname,
+					lastname,
+					image: user.image || "",
+					provider: account?.provider || "",
+					providerId: account?.providerAccountId || "",
+				};
+
+				Logger.info("Sending OAuth data to backend", {
+					email: oauthData.email,
+					provider: oauthData.provider,
+					apiUrl: process.env.NEXT_PUBLIC_API_URL,
+				});
+
+				// Check if API URL is configured
+				if (!process.env.NEXT_PUBLIC_API_URL) {
+					Logger.error("NEXT_PUBLIC_API_URL not configured");
+					// For development, allow sign-in without backend sync
+					if (process.env.NODE_ENV === "development") {
+						Logger.warning("Development mode: proceeding without backend sync");
+						user.id = user.email; // Use email as fallback ID
+						user.backendId = user.email;
+						user.backendData = {
+							publicId: user.email,
+							email: user.email,
+							firstname,
+							lastname,
+							image: user.image || "",
+						} as UserResponse;
+						return true;
+					}
+					return false;
+				}
 
 				const response = await apiClient.post<UserResponse, OAuthRequest>(
 					`${process.env.NEXT_PUBLIC_API_URL}/auth/oauth`,
-					{
-						email: user.email,
-						firstname,
-						lastname,
-						image: user.image || "",
-						provider: account.provider,
-						providerId: account.providerAccountId,
-					}
+					oauthData
 				);
 
 				if (!response) {
-					Logger.error("Backend user creation failed");
+					Logger.error("Backend sync failed: No response from server");
+					// For development, allow sign-in without backend sync
+					if (process.env.NODE_ENV === "development") {
+						Logger.warning("Development mode: proceeding without backend sync");
+						user.id = user.email;
+						user.backendId = user.email;
+						user.backendData = {
+							publicId: user.email,
+							email: user.email,
+							firstname,
+							lastname,
+							image: user.image || "",
+						} as UserResponse;
+						return true;
+					}
 					return false;
 				}
 
+				// Store backend data in the user object
 				user.id = response.publicId;
+				user.backendId = response.publicId;
+				user.backendData = response;
 
 				Logger.info(
-					`User ${user.email} successfully authenticated via ${account.provider}`
+					`User ${user.email} successfully authenticated and synced`,
+					{
+						backendId: response.publicId,
+					}
 				);
 				return true;
 			} catch (error) {
-				if (
-					typeof error === "object" &&
-					error !== null &&
-					"response" in error &&
-					typeof (error as { response?: { status?: number } }).response !==
-						"undefined" &&
-					(error as { response?: { status?: number } }).response?.status === 409
-				) {
-					Logger.info(`User ${user?.email} already exists in backend`);
+				Logger.error(`OAuth signIn failed:`, {
+					error: error instanceof Error ? error.message : error,
+					provider: account?.provider,
+					email: user?.email,
+				});
+
+				// For development, be more lenient
+				if (process.env.NODE_ENV === "development") {
+					Logger.warning(
+						"Development mode: allowing sign-in despite backend error"
+					);
+					user.id = user.email || "dev-user";
+					user.backendId = user.email || "dev-user";
+					user.backendData = {
+						publicId: user.email || "dev-user",
+						email: user.email || "",
+						firstname: user.name?.split(" ")[0] || "Dev",
+						lastname: user.name?.split(" ").slice(1).join(" ") || "User",
+						image: user.image || "",
+					} as UserResponse;
 					return true;
 				}
-				Logger.error(`Backend user creation failed: ${error}`);
+
 				return false;
 			}
 		},
 
-		async jwt({ token, account, user }) {
-			if (account?.access_token) {
-				token.accessToken = account.access_token;
+		async jwt({ token, user, account }) {
+			if (user?.backendId) {
+				token.backendId = user.backendId;
 			}
 
-			if (user?.id) {
-				token.backendUserId = user.id;
+			if (user?.backendData) {
+				token.backendData = user.backendData;
+			}
+
+			if (account) {
+				token.provider = account.provider;
+				token.accessToken = account.access_token;
 			}
 
 			return token;
 		},
 
 		async session({ session, token }) {
-			if (token.backendUserId && session.user) {
-				session.user.id = token.backendUserId as string;
+			if (token.backendId && session.user) {
+				session.user.id = token.backendId as string;
+			}
+
+			if (token.backendData && session.user) {
+				session.user = {
+					...session.user,
+					...token.backendData,
+					id: token.backendId as string,
+				};
+			}
+
+			if (token.provider) {
+				session.provider = token.provider as string;
 			}
 
 			if (token.accessToken) {
 				session.accessToken = token.accessToken as string;
 			}
 
-			if (token.backendToken) {
-				session.backendToken = token.backendToken as string;
-			}
-
 			return session;
 		},
 	},
+
+	pages: {
+		signIn: "/login",
+		error: "/auth/error",
+	},
+
+	debug: process.env.NODE_ENV === "development",
 });

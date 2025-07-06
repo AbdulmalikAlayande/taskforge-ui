@@ -20,7 +20,7 @@ class Logger {
 			)}`,
 			meta
 		);
-		Logger.sendToServer("ERROR", message, meta);
+		// Logger.sendToServer("ERROR", message, meta);
 	}
 
 	static info(message: string, meta?: object): void {
@@ -30,7 +30,7 @@ class Logger {
 			)} - ${chalk.blue(message)}`,
 			meta
 		);
-		Logger.sendToServer("INFO", message, meta);
+		// Logger.sendToServer("INFO", message, meta);
 	}
 	static warning(message: string, meta?: object): void {
 		console.log(
@@ -39,7 +39,7 @@ class Logger {
 			)} - ${chalk.yellow(message)}`,
 			meta
 		);
-		Logger.sendToServer("WARN", message, meta);
+		// Logger.sendToServer("WARN", message, meta);
 	}
 
 	static success(message: string, meta?: object): void {
@@ -49,7 +49,7 @@ class Logger {
 			)} - ${chalk.green(message)}`,
 			meta
 		);
-		Logger.sendToServer("SUCCESS", message, meta);
+		// Logger.sendToServer("SUCCESS", message, meta);
 	}
 
 	static debug(message: string, meta?: object): void {
@@ -59,7 +59,7 @@ class Logger {
 			)} - ${chalk.magenta(message)}`,
 			meta
 		);
-		Logger.sendToServer("DEBUG", message, meta);
+		// Logger.sendToServer("DEBUG", message, meta);
 	}
 
 	private static sendToServer(
@@ -69,7 +69,7 @@ class Logger {
 	): void {
 		// if (process.env.PROD === true) {
 		axios.post(
-			"https://api.paydues.ng/api/logs/create",
+			`${process.env.NEXT_PUBLIC_API_URL}/logs/create-new`,
 			{ message, level, meta: data },
 			{
 				headers: { "Content-Type": "application/json" },

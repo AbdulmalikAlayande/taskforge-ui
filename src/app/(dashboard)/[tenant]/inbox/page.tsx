@@ -6,7 +6,7 @@ import { AppSidebar } from "../components/sidebar/app-sidebar";
 import { AppNavbar } from "../components/navbar/app-navbar";
 import { useTenant } from "@src/components/tenant-provider";
 
-const Project = () => {
+const Inbox = () => {
 	const { tenantData, isLoading } = useTenant();
 
 	if (isLoading) {
@@ -14,7 +14,7 @@ const Project = () => {
 			<div className="min-h-screen flex items-center justify-center">
 				<div className="text-center">
 					<div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-					<p className="text-muted-foreground">Loading projects...</p>
+					<p className="text-muted-foreground">Loading inbox...</p>
 				</div>
 			</div>
 		);
@@ -31,27 +31,24 @@ const Project = () => {
 		>
 			<AppSidebar variant={"inset"} />
 			<SidebarInset>
-				<AppNavbar section={"Projects"} />
+				<AppNavbar section={"Inbox"} />
 				<div className="p-6">
 					<div className="mb-6">
-						<h1 className="text-2xl font-bold">Projects</h1>
+						<h1 className="text-2xl font-bold">Inbox</h1>
 						{tenantData && (
 							<p className="text-muted-foreground">
-								Managing projects for {tenantData.name}
+								Notifications and messages for {tenantData.name}
 							</p>
 						)}
 					</div>
 
-					{/* Your project content will go here */}
+					{/* Your inbox content will go here */}
 					<div className="grid gap-4">
 						<div className="border rounded-lg p-6">
-							<h3 className="text-lg font-medium mb-2">No projects yet</h3>
-							<p className="text-muted-foreground mb-4">
-								Get started by creating your first project.
+							<h3 className="text-lg font-medium mb-2">No messages</h3>
+							<p className="text-muted-foreground">
+								You&apos;re all caught up! No new messages or notifications.
 							</p>
-							<button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
-								Create Project
-							</button>
 						</div>
 					</div>
 				</div>
@@ -60,4 +57,4 @@ const Project = () => {
 	);
 };
 
-export default Project;
+export default Inbox;

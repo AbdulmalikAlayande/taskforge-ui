@@ -15,7 +15,7 @@ export function useUserStorage() {
 		const storageData: StoredUserData = {
 			publicId: userData.publicId,
 			email: userData.email,
-			firstName: userData.firstname, // Note: API has typo "fistname"
+			firstName: userData.firstname,
 			lastName: userData.lastname,
 			image: userData.image,
 			organizationId: userData.organizationId,
