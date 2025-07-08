@@ -6,3 +6,8 @@ export interface OAuthRequest {
 	provider: string;
 	providerId: string;
 }
+
+export interface LoginRequest {
+	email: string;
+	password: string;
+}

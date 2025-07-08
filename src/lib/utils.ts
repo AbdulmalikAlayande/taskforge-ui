@@ -1,8 +1,36 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { LoginRequest } from "./request-types";
+import { apiClient } from "./apiClient";
+import { LoginResponse } from "./response-types";
+import { Session } from "next-auth";
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
+}
+
+export async function login(
+	request: LoginRequest,
+	updateSession: (data?: Session | null) => Promise<Session | null>
+): Promise<LoginResponse> {
+	const response = await apiClient.post<LoginResponse, LoginRequest>(
+		`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+		request
+	);
+
+	await updateSession({
+		...(await updateSession()),
+		accessToken: response.accessToken,
+		refreshToken: response.refreshToken,
+		backendToken: response.refreshToken,
+		user: {
+			...((await updateSession())?.user || {}),
+			...response,
+		},
+		expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+	} as Session);
+
+	return response;
 }
 
 export const defaultIdustries = [

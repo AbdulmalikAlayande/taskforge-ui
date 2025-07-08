@@ -4,6 +4,16 @@ export enum Role {
 	ORGANIZATION_OWNER = "ORGANIZATION_OWNER",
 }
 
+export interface LoginResponse {
+	userId: string;
+	email: string;
+	accessToken: string;
+	refreshToken: string;
+	roles: string[];
+	tokenType: "Bearer";
+	expiresIn: string;
+}
+
 export interface UserResponse {
 	role: Role;
 	publicId: string;

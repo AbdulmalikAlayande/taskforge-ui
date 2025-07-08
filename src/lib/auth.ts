@@ -11,6 +11,7 @@ declare module "next-auth" {
 	interface Session {
 		accessToken?: string;
 		backendToken?: string;
+		refreshToken?: string;
 		provider?: string;
 		user: {
 			id: string;
@@ -34,6 +35,7 @@ declare module "next-auth" {
 		backendData?: UserResponse;
 		provider?: string;
 		accessToken?: string;
+		refreshToken?: string;
 	}
 }
 
@@ -101,7 +103,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 					apiUrl: process.env.NEXT_PUBLIC_API_URL,
 				});
 
-				// Check if API URL is configured
 				if (!process.env.NEXT_PUBLIC_API_URL) {
 					Logger.error("NEXT_PUBLIC_API_URL not configured");
 					// For development, allow sign-in without backend sync
@@ -145,7 +146,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 					return false;
 				}
 
-				// Store backend data in the user object
 				user.id = response.publicId;
 				user.backendId = response.publicId;
 				user.backendData = response;
@@ -163,24 +163,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 					provider: account?.provider,
 					email: user?.email,
 				});
-
-				// For development, be more lenient
-				if (process.env.NODE_ENV === "development") {
-					Logger.warning(
-						"Development mode: allowing sign-in despite backend error"
-					);
-					user.id = user.email || "dev-user";
-					user.backendId = user.email || "dev-user";
-					user.backendData = {
-						publicId: user.email || "dev-user",
-						email: user.email || "",
-						firstname: user.name?.split(" ")[0] || "Dev",
-						lastname: user.name?.split(" ").slice(1).join(" ") || "User",
-						image: user.image || "",
-					} as UserResponse;
-					return true;
-				}
-
 				return false;
 			}
 		},
@@ -197,6 +179,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 			if (account) {
 				token.provider = account.provider;
 				token.accessToken = account.access_token;
+				token.refreshToken = account.refresh_token;
 			}
 
 			return token;
@@ -221,6 +204,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
 			if (token.accessToken) {
 				session.accessToken = token.accessToken as string;
+			}
+
+			if (token.refreshToken) {
+				session.refreshToken = token.refreshToken as string;
 			}
 
 			return session;

@@ -59,26 +59,30 @@ class ApiClient {
 				return response;
 			},
 			(error) => {
-				const status = error.response?.status;
-				const message =
-					error.response?.data?.message || "An unexpected error occurred";
-				const code = error.response?.data?.code;
-				const details = error.response?.data?.details;
-
-				Logger.error(`API Error: ${status} ${error.config?.url}`, {
-					message,
-					code,
-					details,
-				});
-
-				const apiError = new ApiError(message, status || 0, code, details);
-
-				if (this.errorHandler) {
-					this.errorHandler(apiError);
-				}
-
-				return Promise.reject(apiError);
+				Logger.error("Errora", error);
 			}
+			// (error) => {
+			// 	const status = error.response?.status;
+			// 	const message =
+			// 		error.response?.data?.message || "An unexpected error occurred";
+			// 	const code = error.response?.data?.code;
+			// 	const details = error.response?.data?.details;
+			// 	Logger.error("Errores", error);
+
+			// 	Logger.error(`API Error: ${status} ${error.config?.url}`, {
+			// 		message,
+			// 		code,
+			// 		details,
+			// 	});
+
+			// 	const apiError = new ApiError(message, status || 0, code, details);
+
+			// 	if (this.errorHandler) {
+			// 		this.errorHandler(apiError);
+			// 	}
+
+			// 	return Promise.reject(apiError);
+			// }
 		);
 	}
 

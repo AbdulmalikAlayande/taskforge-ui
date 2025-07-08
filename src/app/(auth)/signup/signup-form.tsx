@@ -23,7 +23,7 @@ import {
 	FaEye,
 	FaEyeSlash,
 } from "react-icons/fa6";
-import { cn } from "@src/lib/utils";
+import { cn, login } from "@src/lib/utils";
 import { Input } from "@src/components/ui/input";
 import { Checkbox } from "@src/components/ui/checkbox";
 import Link from "next/link";
@@ -31,7 +31,7 @@ import Logger from "@src/lib/logger";
 import { UserResponse } from "@src/lib/response-types";
 import { useUserStorage } from "@src/app/hooks/useUserStorage";
 import { useApiClient } from "@src/app/hooks/useApiClient";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 // Zod schema for form validation
 const signupSchema = z
@@ -86,7 +86,7 @@ export function SignupForm({
 	const apiClient = useApiClient();
 	const router = useRouter();
 	const { storeUserData } = useUserStorage();
-
+	const { update } = useSession();
 	// Track active loading toast to ensure cleanup
 	const loadingToastRef = useRef<string | number | null>(null);
 
@@ -126,7 +126,6 @@ export function SignupForm({
 	const onSubmit: SubmitHandler<SignupFormData> = async (data) => {
 		setIsLoading(true);
 		let loadingToast: string | number | null = null;
-
 		try {
 			loadingToast = toast.loading("Creating your account...");
 
@@ -135,6 +134,7 @@ export function SignupForm({
 				data
 			);
 
+			Logger.info("Responses:: ", response);
 			if (loadingToast) {
 				toast.dismiss(loadingToast);
 				loadingToast = null;
@@ -147,6 +147,16 @@ export function SignupForm({
 					description: "Welcome to TaskForge! Let's set up your organization.",
 					duration: 3000,
 				});
+				// You can still access the password from the original form data (the `data` variable)
+				const loginResponse = login(
+					{
+						email: response.email,
+						password: data.password,
+					},
+					update
+				);
+
+				Logger.success("Login was successful", loginResponse);
 
 				reset();
 
