@@ -28,10 +28,45 @@ import { Input } from "@src/components/ui/input";
 import { Checkbox } from "@src/components/ui/checkbox";
 import Link from "next/link";
 import Logger from "@src/lib/logger";
-import { UserResponse } from "@src/lib/response-types";
+import { UserResponse, LoginResponse } from "@src/lib/response-types";
 import { useUserStorage } from "@src/app/hooks/useUserStorage";
 import { useApiClient } from "@src/app/hooks/useApiClient";
 import { signIn, useSession } from "next-auth/react";
+
+const manuallyUpdateAuthSession = (loginResponse: LoginResponse) => {
+	try {
+		Logger.debug("Attempting to manually update auth session storage");
+		const existingSessionStr =
+			localStorage.getItem("next-auth.session-token") ||
+			sessionStorage.getItem("next-auth.session-token");
+
+		if (!existingSessionStr) {
+			Logger.warning("No existing session found in storage");
+			return false;
+		}
+
+		if (loginResponse.accessToken) {
+			sessionStorage.setItem(
+				"next-auth.access-token",
+				loginResponse.accessToken
+			);
+			Logger.debug("Access token stored in session storage");
+		}
+
+		if (loginResponse.refreshToken) {
+			sessionStorage.setItem(
+				"next-auth.refresh-token",
+				loginResponse.refreshToken
+			);
+			Logger.debug("Refresh token stored in session storage");
+		}
+
+		return true;
+	} catch (error) {
+		Logger.error("Error manually updating auth session:", { error });
+		return false;
+	}
+};
 
 // Zod schema for form validation
 const signupSchema = z
@@ -87,10 +122,9 @@ export function SignupForm({
 	const router = useRouter();
 	const { storeUserData } = useUserStorage();
 	const { update } = useSession();
-	// Track active loading toast to ensure cleanup
+
 	const loadingToastRef = useRef<string | number | null>(null);
 
-	// Cleanup loading toasts when component unmounts
 	useEffect(() => {
 		return () => {
 			if (loadingToastRef.current) {
@@ -134,7 +168,6 @@ export function SignupForm({
 				data
 			);
 
-			Logger.info("Responses:: ", response);
 			if (loadingToast) {
 				toast.dismiss(loadingToast);
 				loadingToast = null;
@@ -148,16 +181,52 @@ export function SignupForm({
 					duration: 3000,
 				});
 
-				// You can still access the password from the original form data (the `data` variable)
-				const loginResponse = await login(
-					{
-						email: response.email,
-						password: data.password,
-					},
-					update
-				);
+				(async () => {
+					console.log("LOGIN PROCESS STARTING");
+					try {
+						console.log(
+							"Attempting to login after signup with email:",
+							response.email
+						);
 
-				Logger.success("Login was successful", loginResponse);
+						await new Promise((resolve) => setTimeout(resolve, 500));
+
+						const loginResponse = await login(
+							{
+								email: response.email,
+								password: data.password,
+							},
+							update
+						);
+
+						console.log(
+							"Login response data:",
+							JSON.stringify({
+								hasAccessToken: !!loginResponse?.accessToken,
+								hasRefreshToken: !!loginResponse?.refreshToken,
+								userId: loginResponse?.userId,
+							})
+						);
+
+						Logger.success("Login was successful", loginResponse);
+
+						const manualUpdateResult = manuallyUpdateAuthSession(loginResponse);
+						console.log("Manual session update result:", manualUpdateResult);
+					} catch (loginError) {
+						console.error("Login after signup failed:", loginError);
+						Logger.error("Login after signup failed:", {
+							error:
+								loginError instanceof Error
+									? loginError.message
+									: String(loginError),
+							stack: loginError instanceof Error ? loginError.stack : undefined,
+						});
+					} finally {
+						console.log("LOGIN PROCESS COMPLETED");
+					}
+				})().catch((err) => {
+					console.error("CRITICAL: Unexpected error in login process:", err);
+				});
 
 				reset();
 

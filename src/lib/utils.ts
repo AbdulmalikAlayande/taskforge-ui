@@ -4,6 +4,7 @@ import { LoginRequest } from "./request-types";
 import { apiClient } from "./apiClient";
 import { LoginResponse } from "./response-types";
 import { Session } from "next-auth";
+import Logger from "./logger";
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -13,25 +14,88 @@ export async function login(
 	request: LoginRequest,
 	updateSession: (data?: Session | null) => Promise<Session | null>
 ): Promise<LoginResponse> {
-	const response = await apiClient.post<LoginResponse, LoginRequest>(
-		`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
-		request
-	);
+	try {
+		Logger.debug(`Login function called with email: ${request.email}`);
 
-	await updateSession({
-		...(await updateSession()),
-		accessToken: response.accessToken,
-		refreshToken: response.refreshToken,
-		backendToken: response.refreshToken,
-		user: {
-			...((await updateSession())?.user || {}),
-			...response,
-		},
-		expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-	} as Session);
+		const response = await apiClient.post<LoginResponse, LoginRequest>(
+			`${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+			request
+		);
 
-	console.log("Sike:: ", response);
-	return response;
+		if (!response) {
+			throw new Error("Login failed: Empty response from server");
+		}
+
+		Logger.debug(
+			"Login API response received: " +
+				JSON.stringify({
+					hasAccessToken: !!response.accessToken,
+					hasRefreshToken: !!response.refreshToken,
+					userId: response.userId,
+				})
+		);
+
+		if (!response.accessToken || !response.refreshToken) {
+			throw new Error("Login failed: Missing tokens in response");
+		}
+
+		try {
+			const currentSession = await updateSession();
+			Logger.debug(
+				"Current session before update: " +
+					JSON.stringify({
+						hasAccessToken: !!currentSession?.accessToken,
+						userId: currentSession?.user?.id,
+					})
+			);
+
+			const sessionUpdateData = {
+				accessToken: response.accessToken,
+				refreshToken: response.refreshToken,
+				backendToken: response.refreshToken,
+				user: {
+					...(currentSession?.user || {}),
+					id: response.userId || currentSession?.user?.id || "",
+					email: currentSession?.user.email,
+					publicId: currentSession?.user.publicId,
+					firstName: currentSession?.user.name,
+					lastName: currentSession?.user.name,
+					image: currentSession?.user.image,
+				},
+				expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+			} as Session;
+
+			Logger.debug(
+				"Session update data prepared: " +
+					JSON.stringify({
+						accessToken: sessionUpdateData.accessToken ? "present" : "missing",
+						refreshToken: sessionUpdateData.refreshToken
+							? "present"
+							: "missing",
+						userId: sessionUpdateData.user?.id,
+					})
+			);
+
+			// Update the session with the new data
+			const updatedSession = await updateSession(sessionUpdateData);
+
+			Logger.debug(
+				"Session update result: " +
+					JSON.stringify({
+						successful: !!updatedSession,
+						hasAccessToken: !!updatedSession?.accessToken,
+						userId: updatedSession?.user?.id,
+					})
+			);
+		} catch (sessionError: unknown) {
+			Logger.error("Error updating session:", { sessionError });
+		}
+
+		return response;
+	} catch (error: unknown) {
+		Logger.error("Login function error:", { error });
+		throw error;
+	}
 }
 
 export const defaultIdustries = [

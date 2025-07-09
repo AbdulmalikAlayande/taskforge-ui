@@ -59,7 +59,8 @@ class ApiClient {
 				return response;
 			},
 			(error) => {
-				Logger.error("Errora", error);
+				Logger.error("API error:", error);
+				return Promise.reject(error);
 			}
 			// (error) => {
 			// 	const status = error.response?.status;
