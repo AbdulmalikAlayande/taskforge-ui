@@ -30,6 +30,7 @@ export async function login(
 		expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
 	} as Session);
 
+	console.log("Sike:: ", response);
 	return response;
 }
 

@@ -147,8 +147,9 @@ export function SignupForm({
 					description: "Welcome to TaskForge! Let's set up your organization.",
 					duration: 3000,
 				});
+
 				// You can still access the password from the original form data (the `data` variable)
-				const loginResponse = login(
+				const loginResponse = await login(
 					{
 						email: response.email,
 						password: data.password,
