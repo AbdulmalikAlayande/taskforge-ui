@@ -19,15 +19,20 @@ import { Input } from "@src/components/ui/input";
 import { Label } from "@src/components/ui/label";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn, defaultIdustries, formatGMTOffset } from "@src/lib/utils";
+import {
+	cn,
+	defaultIdustries,
+	formatGMTOffset,
+	defaultCountries,
+	defaultTimeZones,
+} from "@src/lib/utils";
 import { useFetch } from "@src/app/hooks/useFetch";
 import {
-	ApiResponse,
 	CountryAndTimezone,
 	OrganizationResponse,
 } from "@src/lib/response-types";
 import Logger from "@src/lib/logger";
-import { apiClient } from "@src/lib/apiClient";
+import { useApiClient } from "@src/app/hooks/useApiClient";
 
 // Organization data schema
 const organizationSchema = z.object({
@@ -104,11 +109,12 @@ export default function OrganizationOnboardingPage() {
 	const industries: string[] = defaultIdustries;
 	const searchParams = useSearchParams();
 	const router = useRouter();
+	const apiClient = useApiClient();
 	const { data: session, status } = useSession();
 	const { getUserData, isSignupCompleted, getAuthIntent, clearUserData } =
 		useUserStorage();
 
-	const { data } = useFetch<CountryAndTimezone>({
+	const { data, error } = useFetch<CountryAndTimezone>({
 		url: `http://api.timezonedb.com/v2.1/list-time-zone?key=${process.env.TIMEZONE_DB_API_KEY || "AFIYJ4MWEMD1"}&format=json`,
 	});
 
@@ -116,6 +122,13 @@ export default function OrganizationOnboardingPage() {
 		data.zones.forEach((zone) => {
 			countries.push(zone.countryName);
 			timeZones.push(formatGMTOffset(zone.gmtOffset, zone.zoneName));
+		});
+	} else if (!data || error) {
+		defaultCountries.forEach((country) => {
+			countries.push(country);
+		});
+		defaultTimeZones.forEach((timezone) => {
+			timeZones.push(timezone);
 		});
 	}
 
@@ -228,7 +241,7 @@ export default function OrganizationOnboardingPage() {
 
 			Logger.info("Creating organization with data:", formData);
 			const response = await apiClient.post<
-				ApiResponse<OrganizationResponse>,
+				OrganizationResponse,
 				OrganizationFormData
 			>(
 				`${process.env.NEXT_PUBLIC_API_URL!}/organization/create-new`,
@@ -241,9 +254,10 @@ export default function OrganizationOnboardingPage() {
 
 			clearUserData();
 
-			// Redirect to the specific tenant dashboard using the organization slug
-			const organizationSlug = response.data.slug || formData.slug;
-			router.push(`/${organizationSlug}/projects`);
+			Logger.info("Response:: ", response);
+
+			const tenantId = response.publicId;
+			router.push(`/${tenantId}/projects`);
 		} catch (error) {
 			console.error("Organization creation error:", error);
 			toast.error("Failed to create organization", {

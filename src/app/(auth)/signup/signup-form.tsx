@@ -42,7 +42,6 @@ const manuallyUpdateAuthSession = (loginResponse: LoginResponse) => {
 
 		if (!existingSessionStr) {
 			Logger.warning("No existing session found in storage");
-			return false;
 		}
 
 		if (loginResponse.accessToken) {
@@ -182,13 +181,7 @@ export function SignupForm({
 				});
 
 				(async () => {
-					console.log("LOGIN PROCESS STARTING");
 					try {
-						console.log(
-							"Attempting to login after signup with email:",
-							response.email
-						);
-
 						await new Promise((resolve) => setTimeout(resolve, 500));
 
 						const loginResponse = await login(
@@ -199,21 +192,11 @@ export function SignupForm({
 							update
 						);
 
-						console.log(
-							"Login response data:",
-							JSON.stringify({
-								hasAccessToken: !!loginResponse?.accessToken,
-								hasRefreshToken: !!loginResponse?.refreshToken,
-								userId: loginResponse?.userId,
-							})
-						);
-
 						Logger.success("Login was successful", loginResponse);
 
 						const manualUpdateResult = manuallyUpdateAuthSession(loginResponse);
 						console.log("Manual session update result:", manualUpdateResult);
 					} catch (loginError) {
-						console.error("Login after signup failed:", loginError);
 						Logger.error("Login after signup failed:", {
 							error:
 								loginError instanceof Error
@@ -222,7 +205,6 @@ export function SignupForm({
 							stack: loginError instanceof Error ? loginError.stack : undefined,
 						});
 					} finally {
-						console.log("LOGIN PROCESS COMPLETED");
 					}
 				})().catch((err) => {
 					console.error("CRITICAL: Unexpected error in login process:", err);
@@ -286,11 +268,9 @@ export function SignupForm({
 		try {
 			Logger.info(`Initiating ${provider} signup`);
 
-			// Store intent in sessionStorage for post-auth handling
 			sessionStorage.setItem("auth_intent", "signup");
 			sessionStorage.setItem("auth_provider", provider);
 
-			// Use NextAuth's client-side signIn
 			const result = await signIn(provider, {
 				callbackUrl: "/auth/success",
 				redirect: false,
@@ -305,11 +285,9 @@ export function SignupForm({
 							: "An unexpected error occurred. Please try again.",
 				});
 			} else if (result?.url) {
-				// Redirect manually since we used redirect: false
 				window.location.href = result.url;
 			}
-		} catch (error) {
-			console.error(`${provider} signup error:`, error);
+		} catch {
 			toast.error(`${provider} signup failed`, {
 				description: "An unexpected error occurred. Please try again.",
 			});

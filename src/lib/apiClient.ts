@@ -144,6 +144,13 @@ class ApiClient {
 		Logger.debug("Auth header removed");
 	}
 
+	getAllHeaders() {
+		return this.client.defaults.headers.common;
+	}
+	getAuthHeader() {
+		return this.client.defaults.headers.common.Authorization;
+	}
+
 	// It returns just the raw client instance, with no config
 	getRawClient(): AxiosInstance {
 		return this.client;
