@@ -31,6 +31,7 @@ import {
 import { Input } from "@src/components/ui/input";
 import { ScrollArea, ScrollBar } from "@src/components/ui/scroll-area";
 import StatusSelector from "./components/status-selector";
+import PrioritySelector from "./components/priority-selector";
 
 const defaultOrganizationData = {
 	publicId: "",
@@ -197,22 +198,12 @@ const Project = () => {
 											<div className="flex flex-wrap gap-2 mt-4">
 												<StatusSelector
 													selected={"backlog"}
-													onChange={function (): void {}}
+													onChange={() => {}}
 												/>
-												<Popover>
-													<PopoverTrigger asChild>
-														<Button
-															variant="outline"
-															size="sm"
-															className="gap-2"
-														>
-															<Label className="cursor-pointer">
-																No priority
-															</Label>
-														</Button>
-													</PopoverTrigger>
-													<PopoverContent className="w-80 h-80 p-4"></PopoverContent>
-												</Popover>
+												<PrioritySelector
+													selected={"no_priority"}
+													onChange={() => {}}
+												/>
 												<Popover>
 													<PopoverTrigger asChild>
 														<Button

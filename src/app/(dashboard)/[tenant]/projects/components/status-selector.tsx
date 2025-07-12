@@ -1,5 +1,11 @@
-import { Loader, Clock, Activity, CheckCircle, XCircle } from "lucide-react";
-import { Check } from "lucide-react";
+import {
+	Check,
+	Loader,
+	Clock,
+	Activity,
+	CheckCircle,
+	XCircle,
+} from "lucide-react";
 import { Button } from "@src/components/ui/button";
 import {
 	Command,
