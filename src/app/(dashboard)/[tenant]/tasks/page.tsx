@@ -98,6 +98,47 @@ const Tasks = () => {
 							<button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
 								Create Task
 							</button>
+							{/* 📁 Project A Project is a high-level container for a larger body
+							of work that drives toward a specific objective or outcome.
+							Projects are often goal-oriented (e.g. "Launch v2.0", "Revamp
+							onboarding") and consist of multiple tasks or issues that need to
+							be completed. Projects are typically time-bound and may span
+							across multiple teams or departments. ✅ Example: "Website
+							Redesign", "Customer Feedback Integration", "Q3 Marketing
+							Campaign" ✅ Task A Task is a specific, actionable unit of work
+							that contributes to a larger objective (usually a project or
+							goal). Tasks should have clear ownership, a due date, and a
+							defined scope. Tasks can be assigned to individuals and tracked
+							from creation to completion. ✅ Example: "Write landing page
+							copy", "Fix login bug", "Send press release to media" 🐞 Issue An
+							Issue is a type of task, often technical, that represents a bug,
+							problem, or enhancement request. Issues typically follow a
+							lifecycle (e.g., Backlog → In Progress → Done) and may include
+							context such as logs, reproduction steps, and priority. ✅
+							Example: "Image carousel not loading on mobile", "Optimize SQL
+							query on dashboard" 🧩 Subtask A Subtask breaks a larger task into
+							smaller, more manageable steps. Subtasks help clarify scope and
+							improve clarity in execution. They are dependent on their parent
+							task. ✅ Example: For the task "Design blog layout": Create
+							wireframe Choose color palette Export mobile and desktop variants
+							🎯 Milestone A Milestone represents a key checkpoint or
+							deliverable within one or more projects. It’s often time-based and
+							signals progress toward a major goal. ✅ Example: "Beta release",
+							"Stakeholder review", "Phase 1 completed" 🗃️ Epic An Epic is a
+							collection of related tasks or issues that span multiple sprints
+							or weeks and contribute toward a larger feature or initiative.
+							Often used in Agile teams. ✅ Example: "Build commenting system",
+							"Implement user permissions" 📄 Document A Document is a piece of
+							reference or planning material attached to a project or task. It
+							may include specs, meeting notes, research, or design files. ✅
+							Example: "Sprint planning notes", "Feature spec for Dark Mode" 👥
+							Assignee The Assignee is the person responsible for completing a
+							task or issue. Every task should ideally have one clearly defined
+							assignee for accountability. 🏷️ Label / Tag Labels or Tags are
+							used to categorize tasks and projects for filtering, search, and
+							workflow automation. They can represent status, type, priority,
+							etc. ✅ Example: "Bug", "High Priority", "Frontend", "Marketing"
+							🧭 Suggested Core Hierarchy (for your app) */}
 						</div>
 					</div>
 				</div>

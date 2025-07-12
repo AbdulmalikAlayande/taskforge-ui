@@ -10,6 +10,27 @@ import Logger from "@src/lib/logger";
 import { useFetch } from "@src/app/hooks/useFetch";
 import { OrganizationResponse } from "@src/lib/response-types";
 import useIndexedDB from "@src/lib/useIndexedDB";
+import { Box, Boxes, ListFilter, SlidersHorizontal } from "lucide-react";
+import { Button } from "@src/components/ui/button";
+import { Label } from "@src/components/ui/label";
+import { TypographyP } from "@src/components/ui/typography";
+import {
+	Popover,
+	PopoverTrigger,
+	PopoverContent,
+} from "@src/components/ui/popover";
+import {
+	Dialog,
+	DialogTitle,
+	DialogHeader,
+	DialogContent,
+	DialogTrigger,
+	DialogDescription,
+	DialogFooter,
+} from "@src/components/ui/dialog";
+import { Input } from "@src/components/ui/input";
+import { ScrollArea, ScrollBar } from "@src/components/ui/scroll-area";
+import StatusSelector from "./components/status-selector";
 
 const defaultOrganizationData = {
 	publicId: "",
@@ -99,28 +120,194 @@ const Project = () => {
 			<AppSidebar variant={"inset"} />
 			<SidebarInset>
 				<AppNavbar section={"Projects"} />
-				<div className="p-6">
-					<div className="mb-6">
-						<h1 className="text-2xl font-bold">Projects</h1>
-						{organization && (
-							<p className="text-muted-foreground">
-								Managing projects for {organization.name}
-							</p>
-						)}
-					</div>
+				<div className="w-full border-b flex justify-between items-center p-2">
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button variant={"ghost"}>
+								<ListFilter />
+								<Label>Filter</Label>
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className="w-80 h-screen p-4"></PopoverContent>
+					</Popover>
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button className="border-2" size={"sm"} variant={"secondary"}>
+								<SlidersHorizontal />
+								<Label>Display</Label>
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className="w-80 h-80 p-4"></PopoverContent>
+					</Popover>
+				</div>
+				<div className="h-full w-full flex flex-col items-center px-6 py-2">
+					<div className="h-full w-full md:w-2/3 lg:1/2 flex flex-col justify-center text-muted-foreground text-sm">
+						<Boxes size={32} color="currentColor" />
+						<TypographyP>
+							A Project is a high-level container for a larger body of work that
+							drives toward a specific objective or outcome, such as a new
+							feature you want to ship.
+						</TypographyP>
+						<TypographyP className="hidden md:block">
+							They are often goal-oriented (e.g. <b>Launch v2.0</b>,
+							<b>Revamp onboarding</b>) and consist of multiple tasks or issues
+							that need to be completed.
+						</TypographyP>
+						<TypographyP className="hidden lg:block">
+							They can be shared across multiple teams and are comprised of
+							issues and optional documents. Projects are typically time-bound
+							and may span across multiple teams or departments.
+						</TypographyP>
 
-					{/* Your project content will go here */}
-					<div className="grid gap-4">
-						<div className="border rounded-lg p-6">
-							<h3 className="text-lg font-medium mb-2">No projects yet</h3>
-							<p className="text-muted-foreground mb-4">
-								Get started by creating your first project.
-							</p>
-							<button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
-								Create Project
-							</button>
+						<div className="mt-4 w-full flex justify-start h-[80px]">
+							<Dialog>
+								<DialogTrigger>
+									<Button variant={"default"} size={"sm"}>
+										Create new project
+									</Button>
+								</DialogTrigger>
+								<DialogContent className="sm:max-w-100 md:max-w-150 lg:max-w-200 sm:max-h-150 w-400 h-140 overflow-scroll">
+									<ScrollArea className="h-full w-full whitespace-nowrap">
+										<DialogHeader className="flex flex-col gap-4 mb-4">
+											<DialogTitle className="text-lg">New project</DialogTitle>
+											<DialogDescription className="w-full">
+												<TypographyP className="flex items-center gap-2 text-sm font-medium break-words whitespace-normal w-full">
+													Provide a name, summary, and details for your new
+													project. Projects help you organize tasks, milestones,
+													and team members around a specific goal or initiative.
+												</TypographyP>
+											</DialogDescription>
+										</DialogHeader>
+										<div className="w-full flex flex-col gap-4">
+											<Box size={32} className="text-muted-foreground mb-2" />
+											<div className="w-full flex flex-col gap-4">
+												<Input
+													placeholder="Project name"
+													name="project_name"
+													className="h-12 text-2xl md:text-4xl font-normal p-2 border-none shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+												/>
+												<Input
+													placeholder="Add a short summary..."
+													name="summary"
+													className="text-sm font-normal p-2 border-none shadow-none bg-transparent text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+												/>
+											</div>
+
+											{/* Project metadata options */}
+											<div className="flex flex-wrap gap-2 mt-4">
+												<StatusSelector
+													selected={"backlog"}
+													onChange={function (): void {}}
+												/>
+												<Popover>
+													<PopoverTrigger asChild>
+														<Button
+															variant="outline"
+															size="sm"
+															className="gap-2"
+														>
+															<Label className="cursor-pointer">
+																No priority
+															</Label>
+														</Button>
+													</PopoverTrigger>
+													<PopoverContent className="w-80 h-80 p-4"></PopoverContent>
+												</Popover>
+												<Popover>
+													<PopoverTrigger asChild>
+														<Button
+															variant="outline"
+															size="sm"
+															className="gap-2"
+														>
+															<Label className="cursor-pointer">Lead</Label>
+														</Button>
+													</PopoverTrigger>
+													<PopoverContent className="w-80 h-80 p-4"></PopoverContent>
+												</Popover>
+												<Popover>
+													<PopoverTrigger asChild>
+														<Button
+															variant="outline"
+															size="sm"
+															className="gap-2"
+														>
+															<Label className="cursor-pointer">Members</Label>
+														</Button>
+													</PopoverTrigger>
+													<PopoverContent className="w-80 h-80 p-4"></PopoverContent>
+												</Popover>
+												<Popover>
+													<PopoverTrigger asChild>
+														<Button
+															variant="outline"
+															size="sm"
+															className="gap-2"
+														>
+															<Label className="cursor-pointer">Start</Label>
+														</Button>
+													</PopoverTrigger>
+													<PopoverContent className="w-80 h-80 p-4"></PopoverContent>
+												</Popover>
+												<Popover>
+													<PopoverTrigger>
+														<Button
+															variant="outline"
+															size="sm"
+															className="gap-2"
+														>
+															<Label className="cursor-pointer">Target</Label>
+														</Button>
+													</PopoverTrigger>
+													<PopoverContent></PopoverContent>
+												</Popover>
+												<Popover>
+													<PopoverTrigger>
+														<Button
+															variant="outline"
+															size="sm"
+															className="gap-2"
+														>
+															<Label className="cursor-pointer">Labels</Label>
+														</Button>
+													</PopoverTrigger>
+													<PopoverContent></PopoverContent>
+												</Popover>
+											</div>
+
+											{/* Description area */}
+											<div className="mt-8">
+												<textarea
+													placeholder="Write a description, a project brief, or collect ideas..."
+													className="w-full min-h-[120px] bg-transparent border-none focus:outline-none resize-none text-sm text-muted-foreground"
+												/>
+											</div>
+
+											{/* Milestones section */}
+											<div className="flex justify-between items-center mt-6 py-2 border-t">
+												<h3 className="text-sm font-medium">Milestones</h3>
+												<Button variant="ghost" size="sm">
+													<span className="text-xl">+</span>
+												</Button>
+											</div>
+										</div>
+										<ScrollBar orientation={"vertical"} />
+									</ScrollArea>
+
+									{/* Dialog footer */}
+									<DialogFooter>
+										<div className="flex justify-end gap-2 mt-6">
+											<Button variant="outline" type="button">
+												Cancel
+											</Button>
+											<Button type="submit">Create project</Button>
+										</div>
+									</DialogFooter>
+								</DialogContent>
+							</Dialog>
 						</div>
 					</div>
+					{/* Your project content will go here */}
 				</div>
 			</SidebarInset>
 		</SidebarProvider>

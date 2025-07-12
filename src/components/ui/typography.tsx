@@ -73,7 +73,10 @@ export function TypographyP({
 	return (
 		<p
 			data-slot="typography-p"
-			className={cn("leading-7 [&:not(:first-child)]:mt-6", className)}
+			className={cn(
+				"leading-7 [&:not(:first-child)]:mt-6 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+				className
+			)}
 			{...props}
 		/>
 	);

@@ -4,7 +4,7 @@ import { ModeToggle } from "@src/components/theme-toggle";
 import { Button } from "@src/components/ui/button";
 import { Separator } from "@src/components/ui/separator";
 import { SidebarTrigger } from "@src/components/ui/sidebar";
-import { TypographyH1 } from "@src/components/ui/typography";
+import { TypographyH4 } from "@src/components/ui/typography";
 import { HelpCircle, Sparkles } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -22,7 +22,7 @@ export const AppNavbar = ({ section }: AppNavbarProps) => {
 					orientation={"vertical"}
 					className={"mx-2 data-[orientation=vertical]:h4"}
 				/>
-				<TypographyH1>{section}</TypographyH1>
+				<TypographyH4>{section}</TypographyH4>
 				<div className={"ml-auto flex items-center gap-2"}>
 					<Button variant="ghost" asChild size="sm" className="hidden sm:flex">
 						<Link
