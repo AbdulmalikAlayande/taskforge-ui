@@ -1,13 +1,80 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { SidebarInset, SidebarProvider } from "@src/components/ui/sidebar";
 import { AppSidebar } from "../components/sidebar/app-sidebar";
 import { AppNavbar } from "../components/navbar/app-navbar";
 import { useTenant } from "@src/components/tenant-provider";
+import { useSearchParams } from "next/navigation";
+import Logger from "@src/lib/logger";
+import { useFetch } from "@src/app/hooks/useFetch";
+import { OrganizationResponse } from "@src/lib/response-types";
+import useIndexedDB from "@src/lib/useIndexedDB";
+
+const defaultOrganizationData = {
+	publicId: "",
+	name: "string",
+	email: "",
+	slug: "",
+	description: "",
+	industry: "",
+	country: "",
+	phone: "",
+	timeZone: "",
+	websiteUrl: "",
+	logoUrl: "",
+};
 
 const Project = () => {
-	const { tenantData, isLoading } = useTenant();
+	const { isLoading, tenantId } = useTenant();
+	const searchParams = useSearchParams();
+	const userId = searchParams.get("uid");
+	const { getOrganization } = useIndexedDB();
+	const [organization, setOrganization] = useState<OrganizationResponse>(
+		defaultOrganizationData
+	);
+
+	const fetchConfig = useMemo(
+		() => ({
+			enabled: !!tenantId,
+			url: `${process.env.NEXT_PUBLIC_API_URL!}/organization/${tenantId}`,
+			queryKey: [`organization-${tenantId}`],
+			retry: 3,
+			refetchOnWindowFocus: false,
+			staleTime: 5 * 60 * 1000,
+		}),
+		[tenantId]
+	);
+
+	const { data } = useFetch<OrganizationResponse>(fetchConfig);
+
+	const loadOrganization = useCallback(async () => {
+		try {
+			const org = await getOrganization(tenantId);
+			if (org) {
+				setOrganization(org);
+				return;
+			}
+
+			if (data) {
+				setOrganization(data);
+			}
+		} catch (error) {
+			Logger.error("Failed to load organization data", {
+				error: String(error),
+			});
+		}
+	}, [data, getOrganization, tenantId]);
+
+	useEffect(() => {
+		if (tenantId) {
+			Logger.debug("Loading organization data for tenant:", {
+				tenantId,
+				userId,
+			});
+			loadOrganization();
+		}
+	}, [tenantId, userId, loadOrganization]);
 
 	if (isLoading) {
 		return (
@@ -35,9 +102,9 @@ const Project = () => {
 				<div className="p-6">
 					<div className="mb-6">
 						<h1 className="text-2xl font-bold">Projects</h1>
-						{tenantData && (
+						{organization && (
 							<p className="text-muted-foreground">
-								Managing projects for {tenantData.name}
+								Managing projects for {organization.name}
 							</p>
 						)}
 					</div>

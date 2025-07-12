@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,8 +33,8 @@ import {
 } from "@src/lib/response-types";
 import Logger from "@src/lib/logger";
 import { useApiClient } from "@src/app/hooks/useApiClient";
+import useIndexedDB from "@src/lib/useIndexedDB";
 
-// Organization data schema
 const organizationSchema = z.object({
 	name: z
 		.string()
@@ -107,15 +107,17 @@ export default function OrganizationOnboardingPage() {
 	const countries: string[] = [];
 	const timeZones: string[] = [];
 	const industries: string[] = defaultIdustries;
-	const searchParams = useSearchParams();
 	const router = useRouter();
-	const apiClient = useApiClient();
+	const tenantAwareApiClient = useApiClient();
+	const { addOrganization } = useIndexedDB();
+
 	const { data: session, status } = useSession();
 	const { getUserData, isSignupCompleted, getAuthIntent, clearUserData } =
 		useUserStorage();
 
 	const { data, error } = useFetch<CountryAndTimezone>({
 		url: `http://api.timezonedb.com/v2.1/list-time-zone?key=${process.env.TIMEZONE_DB_API_KEY || "AFIYJ4MWEMD1"}&format=json`,
+		queryKey: ["countries", "timezones"],
 	});
 
 	if (data) {
@@ -171,7 +173,6 @@ export default function OrganizationOnboardingPage() {
 	}, [watchedName, setValue, currentStep]);
 
 	useEffect(() => {
-		// Check if user came from signup flow
 		const userData = getUserData();
 		const authIntent = getAuthIntent();
 
@@ -189,15 +190,7 @@ export default function OrganizationOnboardingPage() {
 			sessionStorage.removeItem("auth_intent");
 			sessionStorage.removeItem("auth_provider");
 		}
-	}, [
-		searchParams,
-		router,
-		getUserData,
-		isSignupCompleted,
-		getAuthIntent,
-		session,
-		status,
-	]);
+	}, [router, getUserData, isSignupCompleted, getAuthIntent, session, status]);
 
 	const currentStepData = steps.find((step) => step.id === currentStep);
 	const isLastStep = currentStep === steps.length;
@@ -240,13 +233,19 @@ export default function OrganizationOnboardingPage() {
 			const formData = getValues();
 
 			Logger.info("Creating organization with data:", formData);
-			const response = await apiClient.post<
-				OrganizationResponse,
-				OrganizationFormData
-			>(
-				`${process.env.NEXT_PUBLIC_API_URL!}/organization/create-new`,
-				formData
-			);
+			const response =
+				await tenantAwareApiClient.apiClient.post<OrganizationResponse>(
+					`${process.env.NEXT_PUBLIC_API_URL!}/organization/create-new`,
+					{
+						...formData,
+						ownerId:
+							sessionStorage.getItem("user_public_id") ||
+							localStorage.getItem("user_public_id"),
+						ownerEmail:
+							sessionStorage.getItem("user_email") ||
+							localStorage.getItem("user_email"),
+					}
+				);
 
 			toast.success("Organization created successfully!", {
 				description: "Welcome to TaskForge! You're all set up.",
@@ -256,8 +255,25 @@ export default function OrganizationOnboardingPage() {
 
 			Logger.info("Response:: ", response);
 
+			(async () => {
+				await addOrganization(response);
+				localStorage.setItem("current_tenant_id", response.publicId);
+				sessionStorage.setItem("current_tenant_id", response.publicId);
+			})().catch((err) => {
+				Logger.error("Failed to add organization to indexedDB", { err });
+			});
+
 			const tenantId = response.publicId;
-			router.push(`/${tenantId}/projects`);
+
+			const userData = getUserData();
+			const userId =
+				session?.user?.id ||
+				userData?.publicId ||
+				localStorage.getItem("user_id") ||
+				sessionStorage.getItem("user_id");
+
+			console.log("Routing to Projects page");
+			router.push(`/${tenantId}/projects?uid=${userId}`);
 		} catch (error) {
 			console.error("Organization creation error:", error);
 			toast.error("Failed to create organization", {

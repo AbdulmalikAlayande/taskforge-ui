@@ -14,12 +14,13 @@ import {
 	CardContent,
 } from "@src/components/ui/card";
 import { FaGoogle, FaMeta, FaApple, FaGithub } from "react-icons/fa6";
-import { cn } from "@src/lib/utils";
+import { cn, login } from "@src/lib/utils";
 import { Input } from "@src/components/ui/input";
 import Link from "next/link";
 import Logger from "@src/lib/logger";
 import { toast } from "sonner";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({
 	email: z
@@ -38,9 +39,10 @@ export function LoginForm({
 	className,
 	...props
 }: React.ComponentProps<"div">) {
+	const { update } = useSession();
 	const [isLoading, setIsLoading] = useState(false);
 	const [socialLoading, setSocialLoading] = useState<string | null>(null);
-
+	const router = useRouter();
 	const {
 		register,
 		handleSubmit,
@@ -55,11 +57,37 @@ export function LoginForm({
 
 	const onSubmit = async (data: LoginFormData) => {
 		setIsLoading(true);
+		let loadingToast: string | number | null = null;
 		try {
-			// Simulate API call
-			await new Promise((resolve) => setTimeout(resolve, 2000));
-			Logger.info("Login data:", data);
-			// Handle successful login here
+			loadingToast = toast.loading("Creating your account...");
+
+			(async () => {
+				try {
+					await new Promise((resolve) => setTimeout(resolve, 500));
+					const response = await login(data, update);
+					Logger.success("Login was successful", response);
+				} catch (loginError) {
+					Logger.error("Login after signup failed:", {
+						error:
+							loginError instanceof Error
+								? loginError.message
+								: String(loginError),
+						stack: loginError instanceof Error ? loginError.stack : undefined,
+					});
+				}
+			})().catch((err) => {
+				console.error("CRITICAL: Unexpected error in login process:", err);
+			});
+
+			if (loadingToast) {
+				toast.dismiss(loadingToast);
+				loadingToast = null;
+			}
+
+			setTimeout(() => {
+				toast.dismiss();
+				router.push(`/auth/success`);
+			}, 1500);
 		} catch (error) {
 			Logger.error(`Login error:: ${error}`);
 		} finally {

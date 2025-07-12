@@ -38,9 +38,9 @@ export const MainWorkspace = ({ items }: NavMainProps) => {
 		<SidebarGroup>
 			<SidebarGroupLabel>Workspace</SidebarGroupLabel>
 			<SidebarMenu>
-				{items.map((item) => (
+				{items.map((item, index) => (
 					<Collapsible
-						key={item.title}
+						key={`${item.title}-${index + (index % 10)}`}
 						asChild
 						defaultOpen={item.isActive}
 						className={"group/collapsible"}
@@ -55,8 +55,10 @@ export const MainWorkspace = ({ items }: NavMainProps) => {
 							</CollapsibleTrigger>
 							<CollapsibleContent>
 								<SidebarMenuSub>
-									{item.items?.map((subItem) => (
-										<SidebarMenuSubItem key={subItem.title}>
+									{item.items?.map((subItem, index) => (
+										<SidebarMenuSubItem
+											key={`${subItem.title}-${index + (index % 10)}`}
+										>
 											<SidebarMenuSubButton asChild>
 												<Link href={subItem.url}>
 													<Label>{subItem.title}</Label>

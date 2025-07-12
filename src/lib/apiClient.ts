@@ -132,16 +132,24 @@ class ApiClient {
 		return response.data;
 	}
 
-	// This helps me set the authorization header
 	setAuthHeader(token: string) {
 		this.client.defaults.headers.common.Authorization = `Bearer ${token}`;
-		Logger.debug("Auth header set");
 	}
 
-	// the removes the authorization header
 	removeAuthHeader() {
 		delete this.client.defaults.headers.common.Authorization;
-		Logger.debug("Auth header removed");
+	}
+
+	setCustomHeader(name: string, value: string) {
+		this.client.defaults.headers.common[name] = value;
+	}
+
+	removeCustomHeader(name: string) {
+		delete this.client.defaults.headers.common[name];
+	}
+
+	getHeader(name: string) {
+		return this.client.defaults.headers.common[name];
 	}
 
 	getAllHeaders() {
@@ -151,12 +159,11 @@ class ApiClient {
 		return this.client.defaults.headers.common.Authorization;
 	}
 
-	// It returns just the raw client instance, with no config
 	getRawClient(): AxiosInstance {
 		return this.client;
 	}
 }
 
 export const apiClient = new ApiClient(
-	process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+	process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api"
 );

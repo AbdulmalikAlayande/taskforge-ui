@@ -1,5 +1,6 @@
 "use client";
 
+import { ModeToggle } from "@src/components/theme-toggle";
 import { Button } from "@src/components/ui/button";
 import { Separator } from "@src/components/ui/separator";
 import { SidebarTrigger } from "@src/components/ui/sidebar";
@@ -33,6 +34,7 @@ export const AppNavbar = ({ section }: AppNavbarProps) => {
 							<HelpCircle />
 						</Link>
 					</Button>
+
 					<Button variant="ghost" asChild size="sm" className="hidden sm:flex">
 						<Link
 							href="https://github.com/shadcn-ui/ui/tree/main/apps/v4/app/(examples)/dashboard"
@@ -42,6 +44,10 @@ export const AppNavbar = ({ section }: AppNavbarProps) => {
 						>
 							<Sparkles />
 						</Link>
+					</Button>
+
+					<Button variant="ghost" asChild size="sm" className="hidden sm:flex">
+						<ModeToggle />
 					</Button>
 				</div>
 			</div>

@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Logger from "@src/lib/logger";
+import { useApiClient } from "@src/app/hooks/useApiClient";
 
 interface TenantContextType {
 	tenantId: string;
@@ -27,23 +29,24 @@ interface TenantData {
 const TenantContext = createContext<TenantContextType | undefined>(undefined);
 
 export function TenantProvider({ children }: { children: React.ReactNode }) {
-	const params = useParams();
-	const tenantId = params.tenant as string;
+	const params = useParams<{ tenant: string }>();
+	const { apiClient } = useApiClient();
+	const tenantId = params.tenant;
 	const [tenantData, setTenantData] = useState<TenantData | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
 	const fetchTenantData = async () => {
+		Logger.debug("Tenant ID:: ", { tenantId });
 		if (!tenantId) return;
 
 		try {
 			setIsLoading(true);
-			const response = await fetch(`/api/tenant/${tenantId}`, {
-				credentials: "include",
-			});
+			const response = await apiClient.get<TenantData>(
+				`/api/organization/${tenantId}`
+			);
 
-			if (response.ok) {
-				const data = await response.json();
-				setTenantData(data);
+			if (response) {
+				setTenantData(response);
 			}
 		} catch (error) {
 			console.error("Error fetching tenant data:", error);

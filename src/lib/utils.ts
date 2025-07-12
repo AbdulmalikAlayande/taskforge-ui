@@ -76,7 +76,6 @@ export async function login(
 					})
 			);
 
-			// Update the session with the new data
 			const updatedSession = await updateSession(sessionUpdateData);
 
 			Logger.debug(
@@ -87,6 +86,9 @@ export async function login(
 						userId: updatedSession?.user?.id,
 					})
 			);
+
+			const manualUpdateResult = manuallyUpdateAuthSession(response);
+			Logger.info("Manual session update result:", { manualUpdateResult });
 		} catch (sessionError: unknown) {
 			Logger.error("Error updating session:", { sessionError });
 		}
@@ -97,6 +99,40 @@ export async function login(
 		throw error;
 	}
 }
+
+const manuallyUpdateAuthSession = (loginResponse: LoginResponse) => {
+	try {
+		Logger.debug("Attempting to manually update auth session storage");
+		const existingSessionStr =
+			localStorage.getItem("next-auth.session-token") ||
+			sessionStorage.getItem("next-auth.session-token");
+
+		if (!existingSessionStr) {
+			Logger.warning("No existing session found in storage");
+		}
+
+		if (loginResponse.accessToken) {
+			sessionStorage.setItem(
+				"next-auth.access-token",
+				loginResponse.accessToken
+			);
+			Logger.debug("Access token stored in session storage");
+		}
+
+		if (loginResponse.refreshToken) {
+			sessionStorage.setItem(
+				"next-auth.refresh-token",
+				loginResponse.refreshToken
+			);
+			Logger.debug("Refresh token stored in session storage");
+		}
+
+		return true;
+	} catch (error) {
+		Logger.error("Error manually updating auth session:", { error });
+		return false;
+	}
+};
 
 export const defaultIdustries = [
 	"Technology",

@@ -77,6 +77,13 @@ export interface OrganizationResponse {
 	name: string;
 	email: string;
 	slug: string;
+	description?: string;
+	industry?: string;
+	country?: string;
+	phone?: string;
+	timeZone?: string;
+	websiteUrl?: string;
+	logoUrl?: string;
 }
 
 export interface ApiErrorResponse {

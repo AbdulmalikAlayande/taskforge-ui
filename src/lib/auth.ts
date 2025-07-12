@@ -74,7 +74,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 					return false;
 				}
 
-				// Allow sign in even without name - we'll generate it
 				let lastname: string = "";
 				let firstname: string = "";
 				let lastnameParts: string[] = [];
@@ -83,7 +82,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 					[firstname, ...lastnameParts] = user.name.split(" ");
 					lastname = lastnameParts.join(" ") || "";
 				} else {
-					// Generate name from email if not provided
 					firstname = user.email.split("@")[0];
 					lastname = "";
 				}
@@ -105,10 +103,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
 				if (!process.env.NEXT_PUBLIC_API_URL) {
 					Logger.error("NEXT_PUBLIC_API_URL not configured");
-					// For development, allow sign-in without backend sync
 					if (process.env.NODE_ENV === "development") {
 						Logger.warning("Development mode: proceeding without backend sync");
-						user.id = user.email; // Use email as fallback ID
+						user.id = user.email;
 						user.backendId = user.email;
 						user.backendData = {
 							publicId: user.email,
@@ -129,7 +126,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
 				if (!response) {
 					Logger.error("Backend sync failed: No response from server");
-					// For development, allow sign-in without backend sync
 					if (process.env.NODE_ENV === "development") {
 						Logger.warning("Development mode: proceeding without backend sync");
 						user.id = user.email;

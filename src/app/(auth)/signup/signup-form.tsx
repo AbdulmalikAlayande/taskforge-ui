@@ -28,44 +28,10 @@ import { Input } from "@src/components/ui/input";
 import { Checkbox } from "@src/components/ui/checkbox";
 import Link from "next/link";
 import Logger from "@src/lib/logger";
-import { UserResponse, LoginResponse } from "@src/lib/response-types";
+import { UserResponse } from "@src/lib/response-types";
 import { useUserStorage } from "@src/app/hooks/useUserStorage";
 import { useApiClient } from "@src/app/hooks/useApiClient";
 import { signIn, useSession } from "next-auth/react";
-
-const manuallyUpdateAuthSession = (loginResponse: LoginResponse) => {
-	try {
-		Logger.debug("Attempting to manually update auth session storage");
-		const existingSessionStr =
-			localStorage.getItem("next-auth.session-token") ||
-			sessionStorage.getItem("next-auth.session-token");
-
-		if (!existingSessionStr) {
-			Logger.warning("No existing session found in storage");
-		}
-
-		if (loginResponse.accessToken) {
-			sessionStorage.setItem(
-				"next-auth.access-token",
-				loginResponse.accessToken
-			);
-			Logger.debug("Access token stored in session storage");
-		}
-
-		if (loginResponse.refreshToken) {
-			sessionStorage.setItem(
-				"next-auth.refresh-token",
-				loginResponse.refreshToken
-			);
-			Logger.debug("Refresh token stored in session storage");
-		}
-
-		return true;
-	} catch (error) {
-		Logger.error("Error manually updating auth session:", { error });
-		return false;
-	}
-};
 
 // Zod schema for form validation
 const signupSchema = z
@@ -117,7 +83,7 @@ export function SignupForm({
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-	const apiClient = useApiClient();
+	const tenantAwareApiClient = useApiClient();
 	const router = useRouter();
 	const { storeUserData } = useUserStorage();
 	const { update } = useSession();
@@ -162,10 +128,10 @@ export function SignupForm({
 		try {
 			loadingToast = toast.loading("Creating your account...");
 
-			const response = await apiClient.post<UserResponse, SignupFormData>(
-				`${process.env.NEXT_PUBLIC_API_URL!}/admin/create-new`,
-				data
-			);
+			const response = await tenantAwareApiClient.apiClient.post<
+				UserResponse,
+				SignupFormData
+			>(`${process.env.NEXT_PUBLIC_API_URL!}/admin/create-new`, data);
 
 			if (loadingToast) {
 				toast.dismiss(loadingToast);
@@ -174,7 +140,6 @@ export function SignupForm({
 
 			if (response?.publicId) {
 				storeUserData(response);
-
 				toast.success("Account created successfully!", {
 					description: "Welcome to TaskForge! Let's set up your organization.",
 					duration: 3000,
@@ -183,7 +148,6 @@ export function SignupForm({
 				(async () => {
 					try {
 						await new Promise((resolve) => setTimeout(resolve, 500));
-
 						const loginResponse = await login(
 							{
 								email: response.email,
@@ -193,9 +157,6 @@ export function SignupForm({
 						);
 
 						Logger.success("Login was successful", loginResponse);
-
-						const manualUpdateResult = manuallyUpdateAuthSession(loginResponse);
-						console.log("Manual session update result:", manualUpdateResult);
 					} catch (loginError) {
 						Logger.error("Login after signup failed:", {
 							error:

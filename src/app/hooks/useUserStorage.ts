@@ -22,17 +22,18 @@ export function useUserStorage() {
 			createdAt: userData.createdAt,
 		};
 
-		// Store in localStorage for cross-session persistence
 		localStorage.setItem("taskforge_user", JSON.stringify(storageData));
-
-		// Store in sessionStorage for immediate access
+		sessionStorage.setItem("taskforge_user", JSON.stringify(storageData));
 		sessionStorage.setItem("signup_completed", "true");
 		sessionStorage.setItem("user_public_id", userData.publicId);
+		sessionStorage.setItem("user_email", userData.email);
 	};
 
 	const getUserData = (): StoredUserData | null => {
 		try {
-			const stored = localStorage.getItem("taskforge_user");
+			const stored =
+				localStorage.getItem("taskforge_user") ||
+				sessionStorage.getItem("taskforge_user");
 			return stored ? JSON.parse(stored) : null;
 		} catch {
 			return null;
