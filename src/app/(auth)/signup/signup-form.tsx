@@ -350,6 +350,7 @@ export function SignupForm({
 								<Input
 									id="firstName"
 									type="text"
+									variant={"normal"}
 									placeholder="John"
 									{...register("firstName")}
 									className={cn(
@@ -375,6 +376,7 @@ export function SignupForm({
 								<Input
 									id="lastName"
 									type="text"
+									variant={"normal"}
 									placeholder="Doe"
 									{...register("lastName")}
 									className={cn(
@@ -399,6 +401,7 @@ export function SignupForm({
 							<Input
 								id="email"
 								type="email"
+								variant={"normal"}
 								placeholder="john@example.com"
 								{...register("email")}
 								className={cn(
@@ -422,6 +425,7 @@ export function SignupForm({
 							<div className="relative">
 								<Input
 									id="password"
+									variant={"normal"}
 									type={showPassword ? "text" : "password"}
 									placeholder="Enter your password"
 									{...register("password")}
@@ -460,6 +464,7 @@ export function SignupForm({
 							<div className="relative">
 								<Input
 									id="confirmPassword"
+									variant={"normal"}
 									type={showConfirmPassword ? "text" : "password"}
 									placeholder="Confirm your password"
 									{...register("confirmPassword")}

@@ -328,6 +328,7 @@ function SidebarInput({
 			<Input
 				data-slot="sidebar-input"
 				data-sidebar="input"
+				variant={"normal"}
 				className={cn(
 					"bg-background h-8 w-full shadow-none",
 					error && "border-red-500 focus-visible:ring-red-500",

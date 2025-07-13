@@ -10,7 +10,13 @@ import Logger from "@src/lib/logger";
 import { useFetch } from "@src/app/hooks/useFetch";
 import { OrganizationResponse } from "@src/lib/response-types";
 import useIndexedDB from "@src/lib/useIndexedDB";
-import { Box, Boxes, ListFilter, SlidersHorizontal } from "lucide-react";
+import {
+	Box,
+	Boxes,
+	Calendar,
+	ListFilter,
+	SlidersHorizontal,
+} from "lucide-react";
 import { Button } from "@src/components/ui/button";
 import { Label } from "@src/components/ui/label";
 import { TypographyP } from "@src/components/ui/typography";
@@ -30,8 +36,15 @@ import {
 } from "@src/components/ui/dialog";
 import { Input } from "@src/components/ui/input";
 import { ScrollArea, ScrollBar } from "@src/components/ui/scroll-area";
-import StatusSelector from "./components/status-selector";
-import PrioritySelector from "./components/priority-selector";
+import {
+	StatusSelector,
+	PrioritySelector,
+	CategorySelector,
+	TeamLeadSelector,
+} from "./components/data-selector";
+import { MemberSelector } from "./components/member-selector";
+import DatePicker from "@src/components/ui/date-picker";
+import { Separator } from "@src/components/ui/separator";
 
 const defaultOrganizationData = {
 	publicId: "",
@@ -97,6 +110,10 @@ const Project = () => {
 			loadOrganization();
 		}
 	}, [tenantId, userId, loadOrganization]);
+
+	const handleOptionClick = (option: string) => {
+		console.log("Selected option:", option);
+	};
 
 	if (isLoading) {
 		return (
@@ -167,8 +184,8 @@ const Project = () => {
 										Create new project
 									</Button>
 								</DialogTrigger>
-								<DialogContent className="sm:max-w-100 md:max-w-150 lg:max-w-200 sm:max-h-150 w-400 h-140 overflow-scroll">
-									<ScrollArea className="h-full w-full whitespace-nowrap">
+								<DialogContent className="sm:max-w-120 md:max-w-170 lg:max-w-220 sm:max-h-150 w-400 h-140 scrollbar-hidden overflow-y-scroll">
+									<ScrollArea className="h-full w-full">
 										<DialogHeader className="flex flex-col gap-4 mb-4">
 											<DialogTitle className="text-lg">New project</DialogTitle>
 											<DialogDescription className="w-full">
@@ -180,66 +197,35 @@ const Project = () => {
 											</DialogDescription>
 										</DialogHeader>
 										<div className="w-full flex flex-col gap-4">
-											<Box size={32} className="text-muted-foreground mb-2" />
-											<div className="w-full flex flex-col gap-4">
+											<span className="bg-accent flex items-center justify-center rounded-sm w-8 h-8 text-muted-foreground">
+												<Box size={20} className="text-muted-foreground" />
+											</span>
+											<div className="w-full flex flex-col gap-2">
 												<Input
-													placeholder="Project name"
+													variant={"minimal"}
+													placeholder="Project name: 'Launch v2.0', 'Revamp onboarding'"
 													name="project_name"
-													className="h-12 text-2xl md:text-4xl font-normal p-2 border-none shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+													className="h-8 text-lg md:text-xl font-semibold p-2 border-none shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
 												/>
 												<Input
+													variant={"minimal"}
 													placeholder="Add a short summary..."
 													name="summary"
-													className="text-sm font-normal p-2 border-none shadow-none bg-transparent text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+													className="text-sm font-semibold p-2 border-none shadow-none bg-transparent text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
 												/>
 											</div>
 
 											{/* Project metadata options */}
-											<div className="flex flex-wrap gap-2 mt-4">
-												<StatusSelector
-													selected={"backlog"}
-													onChange={() => {}}
+											<div className="flex flex-wrap gap-2 text-sm">
+												<StatusSelector onChange={handleOptionClick} />
+												<PrioritySelector onChange={handleOptionClick} />
+												<CategorySelector onChange={handleOptionClick} />
+												<TeamLeadSelector onChange={handleOptionClick} />
+												<MemberSelector onChange={handleOptionClick} />
+												<DatePicker
+													triggerLabel="Start"
+													triggerIcon={<Calendar />}
 												/>
-												<PrioritySelector
-													selected={"no_priority"}
-													onChange={() => {}}
-												/>
-												<Popover>
-													<PopoverTrigger asChild>
-														<Button
-															variant="outline"
-															size="sm"
-															className="gap-2"
-														>
-															<Label className="cursor-pointer">Lead</Label>
-														</Button>
-													</PopoverTrigger>
-													<PopoverContent className="w-80 h-80 p-4"></PopoverContent>
-												</Popover>
-												<Popover>
-													<PopoverTrigger asChild>
-														<Button
-															variant="outline"
-															size="sm"
-															className="gap-2"
-														>
-															<Label className="cursor-pointer">Members</Label>
-														</Button>
-													</PopoverTrigger>
-													<PopoverContent className="w-80 h-80 p-4"></PopoverContent>
-												</Popover>
-												<Popover>
-													<PopoverTrigger asChild>
-														<Button
-															variant="outline"
-															size="sm"
-															className="gap-2"
-														>
-															<Label className="cursor-pointer">Start</Label>
-														</Button>
-													</PopoverTrigger>
-													<PopoverContent className="w-80 h-80 p-4"></PopoverContent>
-												</Popover>
 												<Popover>
 													<PopoverTrigger>
 														<Button
@@ -264,23 +250,24 @@ const Project = () => {
 													</PopoverTrigger>
 													<PopoverContent></PopoverContent>
 												</Popover>
+												<Separator className="mt-2" />
 											</div>
 
 											{/* Description area */}
-											<div className="mt-8">
+											<div className="">
 												<textarea
 													placeholder="Write a description, a project brief, or collect ideas..."
 													className="w-full min-h-[120px] bg-transparent border-none focus:outline-none resize-none text-sm text-muted-foreground"
 												/>
 											</div>
 
-											{/* Milestones section */}
+											{/* Milestones section
 											<div className="flex justify-between items-center mt-6 py-2 border-t">
 												<h3 className="text-sm font-medium">Milestones</h3>
 												<Button variant="ghost" size="sm">
 													<span className="text-xl">+</span>
 												</Button>
-											</div>
+											</div> */}
 										</div>
 										<ScrollBar orientation={"vertical"} />
 									</ScrollArea>

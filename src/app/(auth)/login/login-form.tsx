@@ -221,6 +221,7 @@ export function LoginForm({
 								<Input
 									id="email"
 									type="email"
+									variant={"normal"}
 									placeholder="m@example.com"
 									{...register("email")}
 									className={cn(
@@ -254,6 +255,7 @@ export function LoginForm({
 								<Input
 									id="password"
 									type="password"
+									variant={"normal"}
 									{...register("password")}
 									className={cn(
 										"border border-input focus:border-ring focus:ring-ring/20 h-12 text-foreground transition-all duration-200",
