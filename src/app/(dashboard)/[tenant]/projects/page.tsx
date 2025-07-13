@@ -184,8 +184,8 @@ const Project = () => {
 										Create new project
 									</Button>
 								</DialogTrigger>
-								<DialogContent className="sm:max-w-120 md:max-w-170 lg:max-w-220 sm:max-h-150 w-400 h-140 scrollbar-hidden overflow-y-scroll">
-									<ScrollArea className="h-full w-full">
+								<DialogContent className="sm:max-w-120 md:max-w-170 lg:max-w-220 sm:max-h-150 w-400 h-140">
+									<ScrollArea className="h-full max-h-[80vh] w-full p-6">
 										<DialogHeader className="flex flex-col gap-4 mb-4">
 											<DialogTitle className="text-lg">New project</DialogTitle>
 											<DialogDescription className="w-full">
@@ -269,18 +269,17 @@ const Project = () => {
 												</Button>
 											</div> */}
 										</div>
+										{/* Dialog footer */}
+										<DialogFooter>
+											<div className="flex justify-end gap-2 mt-6">
+												<Button variant="outline" type="button">
+													Cancel
+												</Button>
+												<Button type="submit">Create project</Button>
+											</div>
+										</DialogFooter>
 										<ScrollBar orientation={"vertical"} />
 									</ScrollArea>
-
-									{/* Dialog footer */}
-									<DialogFooter>
-										<div className="flex justify-end gap-2 mt-6">
-											<Button variant="outline" type="button">
-												Cancel
-											</Button>
-											<Button type="submit">Create project</Button>
-										</div>
-									</DialogFooter>
 								</DialogContent>
 							</Dialog>
 						</div>
