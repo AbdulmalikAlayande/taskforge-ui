@@ -1,4 +1,5 @@
 import { UserResponse } from "@src/lib/response-types";
+import { useCallback } from "react";
 
 interface StoredUserData {
 	publicId: string;
@@ -11,7 +12,7 @@ interface StoredUserData {
 }
 
 export function useUserStorage() {
-	const storeUserData = (userData: UserResponse) => {
+	const storeUserData = useCallback((userData: UserResponse) => {
 		const storageData: StoredUserData = {
 			publicId: userData.publicId,
 			email: userData.email,
@@ -27,9 +28,9 @@ export function useUserStorage() {
 		sessionStorage.setItem("signup_completed", "true");
 		sessionStorage.setItem("user_public_id", userData.publicId);
 		sessionStorage.setItem("user_email", userData.email);
-	};
+	}, []);
 
-	const getUserData = (): StoredUserData | null => {
+	const getUserData = useCallback((): StoredUserData | null => {
 		try {
 			const stored =
 				localStorage.getItem("taskforge_user") ||
@@ -38,7 +39,7 @@ export function useUserStorage() {
 		} catch {
 			return null;
 		}
-	};
+	}, []);
 
 	const clearUserData = () => {
 		localStorage.removeItem("taskforge_user");

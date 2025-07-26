@@ -26,17 +26,25 @@ type MemberSelectorProps = {
 };
 export function MemberSelector({ onChange }: MemberSelectorProps) {
 	const { tenantId } = useTenant();
-	let selectedMembers: MemberSelectorOption[] = [];
+	const [selectedMembers, setSelectedMembers] = React.useState<
+		MemberSelectorOption[]
+	>([]);
 
-	const { data, isLoading } = useFetch<UserResponse[]>({
-		url: `${process.env.NEXT_PUBLIC_API_URL}/organization/${tenantId}/members`,
-		queryKey: [],
-	});
+	const fetchConfig = React.useMemo(
+		() => ({
+			url: `${process.env.NEXT_PUBLIC_API_URL}/organization/${tenantId}/members`,
+			queryKey: [`members-${tenantId}`],
+			enabled: !!tenantId,
+		}),
+		[tenantId]
+	);
+
+	const { data, isLoading } = useFetch<UserResponse[]>(fetchConfig);
 
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
-				<Button variant="outline" size="sm" className="gap-2">
+				<Button variant="outline" size="sm" className="h-6 gap-2 p-0">
 					{selectedMembers.length > 0 ? (
 						selectedMembers.map((member) => (
 							<span key={member.id} className="flex items-center gap-2">
@@ -82,13 +90,38 @@ export function MemberSelector({ onChange }: MemberSelectorProps) {
 									checked={selectedMembers.some(
 										(m) => m.id === member.publicId
 									)}
-									onCheckedChange={() => {
-										if (selectedMembers.some((m) => m.id === member.publicId)) {
-											selectedMembers = selectedMembers.filter(
-												(m) => m.id !== member.publicId
-											);
+									onCheckedChange={(checked) => {
+										setSelectedMembers((prev) => {
+											if (prev.some((m) => m.id === member.publicId)) {
+												return prev.filter((m) => m.id !== member.publicId);
+											} else {
+												const newMember: MemberSelectorOption = {
+													id: member.publicId,
+													name: `${member.firstname} ${member.lastname}`,
+													icon: member.image ? (
+														<Image
+															src={member.image}
+															alt={`${member.firstname} ${member.lastname}`}
+															width={24}
+															height={24}
+															className="rounded-full"
+														/>
+													) : (
+														MoreHorizontal
+													),
+													value: member.publicId,
+												};
+												return [...prev, newMember];
+											}
+										});
+
+										// Only call onChange when there's a change
+										if (
+											checked !==
+											selectedMembers.some((m) => m.id === member.publicId)
+										) {
+											onChange(member.publicId);
 										}
-										onChange(member.publicId);
 									}}
 								/>
 								{`${member.firstname} ${member.lastname}`}

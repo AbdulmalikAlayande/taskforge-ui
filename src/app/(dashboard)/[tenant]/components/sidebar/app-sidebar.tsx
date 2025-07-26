@@ -5,15 +5,17 @@ import {
 	SidebarContent,
 	SidebarFooter,
 	SidebarHeader,
+	SidebarRail,
 } from "@src/components/ui/sidebar";
 import React, { useEffect, useState } from "react";
 import { TeamSwitcher } from "./team-switcher";
 import { MainWorkspace } from "./main-workspace";
 import { MemberInvitationTrigger } from "./member-invitation-trigger";
-import { UserActions } from "./user-actions";
+import { UserAccountActions } from "./user-account-actions";
 import { BarChart2, FolderClosed, ListTodo, MailCheck } from "lucide-react";
 import { useUserStorage } from "@src/app/hooks/useUserStorage";
 import Logger from "@src/lib/logger";
+import { defaultTeams } from "@src/lib/utils";
 
 const workspaceItems = [
 	{
@@ -113,14 +115,13 @@ export const AppSidebar = ({
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
-				AppSidebar
-				<TeamSwitcher teams={[]} />
+				<TeamSwitcher teams={defaultTeams} />
 			</SidebarHeader>
 			<SidebarContent>
 				<MainWorkspace items={workspaceItems} />
 			</SidebarContent>
 			<SidebarFooter>
-				<UserActions
+				<UserAccountActions
 					user={{
 						name: userData?.name || "",
 						email: userData?.email || "",
@@ -129,6 +130,7 @@ export const AppSidebar = ({
 				/>
 				<MemberInvitationTrigger />
 			</SidebarFooter>
+			<SidebarRail />
 		</Sidebar>
 	);
 };

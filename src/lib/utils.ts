@@ -5,6 +5,7 @@ import { apiClient } from "./apiClient";
 import { LoginResponse } from "./response-types";
 import { Session } from "next-auth";
 import Logger from "./logger";
+import { Cuboid, Club } from "lucide-react";
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -205,3 +206,16 @@ export function formatGMTOffset(gmtOffset: number, zoneName: string) {
 
 	return `UTC${sign}${paddedHours}:${paddedMinutes} (${friendlyName})`;
 }
+
+export const defaultTeams = [
+	{
+		name: "Apex",
+		logo: Cuboid,
+		plan: "Free",
+	},
+	{
+		name: "Bloggy",
+		logo: Club,
+		plan: "Premium",
+	},
+];

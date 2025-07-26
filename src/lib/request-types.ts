@@ -48,8 +48,8 @@ export interface ProjectRequest {
 	name: string;
 	summary: string;
 	description: string;
-	startDate: Date;
-	endDate: Date;
+	startDate: string;
+	endDate: string;
 	organizationId: string;
 	memberIds: string[];
 	status: ProjectStatus;

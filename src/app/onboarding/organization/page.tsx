@@ -272,7 +272,6 @@ export default function OrganizationOnboardingPage() {
 				localStorage.getItem("user_id") ||
 				sessionStorage.getItem("user_id");
 
-			console.log("Routing to Projects page");
 			router.push(`/${tenantId}/projects?uid=${userId}`);
 		} catch (error) {
 			console.error("Organization creation error:", error);
@@ -386,6 +385,7 @@ export default function OrganizationOnboardingPage() {
 								{...register("name")}
 								placeholder="Acme Inc."
 								className="h-12 mt-2"
+								variant={"normal"}
 							/>
 							{errors.name && (
 								<p className="text-sm text-destructive mt-1">
@@ -406,6 +406,7 @@ export default function OrganizationOnboardingPage() {
 								{...register("slug")}
 								placeholder="acme-inc"
 								className="h-12 mt-2"
+								variant={"normal"}
 							/>
 							<p className="text-xs text-muted-foreground mt-1">
 								This will be used in your organization URL
@@ -423,6 +424,7 @@ export default function OrganizationOnboardingPage() {
 								{...register("description")}
 								placeholder="Brief description of your organization"
 								className="h-12 mt-2"
+								variant={"normal"}
 							/>
 						</div>
 					</div>
@@ -485,6 +487,7 @@ export default function OrganizationOnboardingPage() {
 								{...register("email")}
 								placeholder="hello@acme.com"
 								className="h-12 mt-2"
+								variant={"normal"}
 							/>
 							{errors.email && (
 								<p className="text-sm text-destructive mt-1">
@@ -500,6 +503,7 @@ export default function OrganizationOnboardingPage() {
 								{...register("phone")}
 								placeholder="+1 (555) 123-4567"
 								className="h-12 mt-2"
+								variant={"normal"}
 							/>
 						</div>
 					</div>
@@ -536,6 +540,7 @@ export default function OrganizationOnboardingPage() {
 								{...register("websiteUrl")}
 								placeholder="https://acme.com"
 								className="h-12 mt-2"
+								variant={"normal"}
 							/>
 							{errors.websiteUrl && (
 								<p className="text-sm text-destructive mt-1">
@@ -551,6 +556,7 @@ export default function OrganizationOnboardingPage() {
 								{...register("logoUrl")}
 								placeholder="https://acme.com/logo.png"
 								className="h-12 mt-2"
+								variant={"normal"}
 							/>
 							{errors.logoUrl && (
 								<p className="text-sm text-destructive mt-1">

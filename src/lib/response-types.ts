@@ -86,6 +86,22 @@ export interface OrganizationResponse {
 	logoUrl?: string;
 }
 
+export interface ProjectResponse {
+	id: string;
+	name: string;
+	summary: string;
+	description: string;
+	startDate: Date;
+	endDate: Date;
+	organizationId: string;
+	memberIds: string[];
+	status: string;
+	priority: string;
+	category: string;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
 export interface ApiErrorResponse {
 	message: string;
 	code?: string;

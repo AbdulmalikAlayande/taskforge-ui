@@ -45,6 +45,14 @@ import {
 import { MemberSelector } from "./components/member-selector";
 import DatePicker from "@src/components/ui/date-picker";
 import { Separator } from "@src/components/ui/separator";
+import { useApiClient } from "@src/app/hooks/useApiClient";
+import {
+	ProjectCategory,
+	ProjectPriority,
+	ProjectRequest,
+	ProjectStatus,
+} from "@src/lib/request-types";
+import { ProjectResponse } from "@src/lib/response-types";
 
 const defaultOrganizationData = {
 	publicId: "",
@@ -60,14 +68,30 @@ const defaultOrganizationData = {
 	logoUrl: "",
 };
 
+const defaultProjectData: ProjectRequest = {
+	name: "",
+	description: "",
+	organizationId: "",
+	summary: "",
+	startDate: "",
+	endDate: "",
+	memberIds: [],
+	status: ProjectStatus.ACTIVE,
+	priority: ProjectPriority.HIGH,
+	category: ProjectCategory.BUILDING,
+};
 const Project = () => {
 	const { isLoading, tenantId } = useTenant();
 	const searchParams = useSearchParams();
 	const userId = searchParams.get("uid");
+	const { apiClient } = useApiClient();
 	const { getOrganization } = useIndexedDB();
+	const [startDate, setStartDate] = useState<Date | null>(null);
+	const [endDate, setEndDate] = useState<Date | null>(new Date());
 	const [organization, setOrganization] = useState<OrganizationResponse>(
 		defaultOrganizationData
 	);
+	const [project, setProject] = useState<ProjectRequest>(defaultProjectData);
 
 	const fetchConfig = useMemo(
 		() => ({
@@ -84,6 +108,7 @@ const Project = () => {
 	const { data } = useFetch<OrganizationResponse>(fetchConfig);
 
 	const loadOrganization = useCallback(async () => {
+		if (!tenantId) return;
 		try {
 			const org = await getOrganization(tenantId);
 			if (org) {
@@ -92,6 +117,7 @@ const Project = () => {
 			}
 
 			if (data) {
+				Logger.debug("Loading organization from API:", data);
 				setOrganization(data);
 			}
 		} catch (error) {
@@ -102,17 +128,55 @@ const Project = () => {
 	}, [data, getOrganization, tenantId]);
 
 	useEffect(() => {
-		if (tenantId) {
-			Logger.debug("Loading organization data for tenant:", {
-				tenantId,
-				userId,
-			});
-			loadOrganization();
+		if (!tenantId) {
+			return;
 		}
-	}, [tenantId, userId, loadOrganization]);
+		// Logger.debug("Loading organization data for tenant:", {
+		// 	tenantId,
+		// 	userId,
+		// });
+		loadOrganization();
+	}, [loadOrganization, tenantId, userId]);
 
-	const handleOptionClick = (option: string) => {
-		console.log("Selected option:", option);
+	useEffect(() => {
+		if (tenantId) {
+			setProject((prev) => ({
+				...prev,
+				organizationId: tenantId,
+			}));
+		}
+	}, [tenantId]);
+
+	const handleOptionClick = (id: string, selectorType?: string) => {
+		console.log("Selected option:", id, "Type:", selectorType);
+		console.log("Project Before:: ", project);
+		setProject((prev) => {
+			switch (selectorType) {
+				case "status":
+					return { ...prev, status: id as ProjectStatus };
+				case "priority":
+					return { ...prev, priority: id as ProjectPriority };
+				case "category":
+					return { ...prev, category: id as ProjectCategory };
+				case "lead":
+					return { ...prev, leadId: id };
+				case "member":
+					// For members, we need to toggle the member in the array
+					const memberIds = [...prev.memberIds];
+					const memberIndex = memberIds.indexOf(id);
+
+					if (memberIndex >= 0) {
+						memberIds.splice(memberIndex, 1);
+					} else {
+						memberIds.push(id);
+					}
+
+					return { ...prev, memberIds };
+				default:
+					return prev;
+			}
+		});
+		console.log("Project After:: ", project);
 	};
 
 	if (isLoading) {
@@ -124,6 +188,41 @@ const Project = () => {
 				</div>
 			</div>
 		);
+	}
+
+	function createProject(event: React.MouseEvent<HTMLButtonElement>): void {
+		event.preventDefault();
+
+		if (!project.name) {
+			alert("Project name is required");
+			return;
+		}
+
+		const projectToSubmit = {
+			...project,
+			startDate: startDate ? startDate.toISOString() : "",
+			endDate: endDate ? endDate.toISOString() : "",
+		};
+
+		Logger.debug("Creating project:", { project: projectToSubmit });
+
+		apiClient
+			.post<ProjectResponse, ProjectRequest>(
+				`${process.env.NEXT_PUBLIC_API_URL}/project/create-new`,
+				projectToSubmit
+			)
+			.then((response) => {
+				Logger.debug("Project created successfully:", { response });
+				// Reset the form or redirect to the new project
+				setProject(defaultProjectData);
+				setStartDate(null);
+				setEndDate(null);
+				// Close the dialog or redirect
+			})
+			.catch((error) => {
+				Logger.error("Failed to create project:", { error: String(error) });
+				alert("Failed to create project. Please try again.");
+			});
 	}
 
 	return (
@@ -179,7 +278,7 @@ const Project = () => {
 
 						<div className="mt-4 w-full flex justify-start h-[80px]">
 							<Dialog>
-								<DialogTrigger>
+								<DialogTrigger asChild>
 									<Button variant={"default"} size={"sm"}>
 										Create new project
 									</Button>
@@ -188,12 +287,10 @@ const Project = () => {
 									<ScrollArea className="h-full max-h-[80vh] w-full p-6">
 										<DialogHeader className="flex flex-col gap-4 mb-4">
 											<DialogTitle className="text-lg">New project</DialogTitle>
-											<DialogDescription className="w-full">
-												<TypographyP className="flex items-center gap-2 text-sm font-medium break-words whitespace-normal w-full">
-													Provide a name, summary, and details for your new
-													project. Projects help you organize tasks, milestones,
-													and team members around a specific goal or initiative.
-												</TypographyP>
+											<DialogDescription className="w-full flex items-center gap-2 text-sm font-medium break-words whitespace-normal">
+												Provide a name, summary, and details for your new
+												project. Projects help you organize tasks, milestones,
+												and team members around a specific goal or initiative.
 											</DialogDescription>
 										</DialogHeader>
 										<div className="w-full flex flex-col gap-4">
@@ -205,58 +302,87 @@ const Project = () => {
 													variant={"minimal"}
 													placeholder="Project name: 'Launch v2.0', 'Revamp onboarding'"
 													name="project_name"
+													value={project.name}
+													onChange={(e) =>
+														setProject((prev) => ({
+															...prev,
+															name: e.target.value,
+														}))
+													}
 													className="h-8 text-lg md:text-xl font-semibold p-2 border-none shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
 												/>
 												<Input
 													variant={"minimal"}
 													placeholder="Add a short summary..."
 													name="summary"
+													value={project.summary}
+													onChange={(e) =>
+														setProject((prev) => ({
+															...prev,
+															summary: e.target.value,
+														}))
+													}
 													className="text-sm font-semibold p-2 border-none shadow-none bg-transparent text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
 												/>
 											</div>
 
 											{/* Project metadata options */}
-											<div className="flex flex-wrap gap-2 text-sm">
-												<StatusSelector onChange={handleOptionClick} />
-												<PrioritySelector onChange={handleOptionClick} />
-												<CategorySelector onChange={handleOptionClick} />
-												<TeamLeadSelector onChange={handleOptionClick} />
-												<MemberSelector onChange={handleOptionClick} />
+											<div className="flex gap-2 text-sm">
+												<StatusSelector
+													onChange={(id) => handleOptionClick(id, "status")}
+												/>
+												<PrioritySelector
+													onChange={(id) => handleOptionClick(id, "priority")}
+												/>
+												<CategorySelector
+													onChange={(id) => handleOptionClick(id, "category")}
+												/>
+												<TeamLeadSelector
+													onChange={(id) => handleOptionClick(id, "lead")}
+												/>
+												<MemberSelector
+													onChange={(id) => handleOptionClick(id, "member")}
+												/>
 												<DatePicker
 													triggerLabel="Start"
-													triggerIcon={<Calendar />}
+													triggerIcon={<Calendar size={14} />}
+													selectedDate={startDate || new Date()}
+													setSelectedDate={(date: Date) => {
+														setStartDate(date);
+														setProject((prev) => ({
+															...prev,
+															startDate: date.toISOString(),
+														}));
+													}}
+													title="Start"
 												/>
-												<Popover>
-													<PopoverTrigger>
-														<Button
-															variant="outline"
-															size="sm"
-															className="gap-2"
-														>
-															<Label className="cursor-pointer">Target</Label>
-														</Button>
-													</PopoverTrigger>
-													<PopoverContent></PopoverContent>
-												</Popover>
-												<Popover>
-													<PopoverTrigger>
-														<Button
-															variant="outline"
-															size="sm"
-															className="gap-2"
-														>
-															<Label className="cursor-pointer">Labels</Label>
-														</Button>
-													</PopoverTrigger>
-													<PopoverContent></PopoverContent>
-												</Popover>
-												<Separator className="mt-2" />
+												<DatePicker
+													triggerLabel="Target"
+													triggerIcon={<Calendar size={14} />}
+													selectedDate={endDate || new Date()}
+													setSelectedDate={(date: Date) => {
+														setEndDate(date);
+														setProject((prev) => ({
+															...prev,
+															endDate: date.toISOString(),
+														}));
+													}}
+													title="Target"
+												/>
 											</div>
+											<Separator className="mt-2" />
 
 											{/* Description area */}
 											<div className="">
 												<textarea
 													placeholder="Write a description, a project brief, or collect ideas..."
+													value={project.description}
+													onChange={(e) =>
+														setProject((prev) => ({
+															...prev,
+															description: e.target.value,
+														}))
+													}
 													className="w-full min-h-[120px] bg-transparent border-none focus:outline-none resize-none text-sm text-muted-foreground"
 												/>
 											</div>
@@ -275,7 +401,9 @@ const Project = () => {
 												<Button variant="outline" type="button">
 													Cancel
 												</Button>
-												<Button type="submit">Create project</Button>
+												<Button onClick={createProject} type="submit">
+													Create project
+												</Button>
 											</div>
 										</DialogFooter>
 										<ScrollBar orientation={"vertical"} />

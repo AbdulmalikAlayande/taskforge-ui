@@ -48,7 +48,7 @@ const ProjectDataSelector = (props: ProjectDataSelectorProps) => {
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
-				<Button variant="outline" size="sm" className="text-sm gap-2 p-0">
+				<Button variant="outline" size="sm" className="h-6 text-sm gap-2 p-0">
 					{selectedOption ? (
 						<span className="w-full h-full flex items-center justify-between gap-2 px-2 border-primary text-primary">
 							<span>{selectedOption.icon}</span>
@@ -83,21 +83,16 @@ const ProjectDataSelector = (props: ProjectDataSelectorProps) => {
 								className="cursor-pointer"
 								key={key}
 								value={option.id}
+								onSelect={() => handleOptionClick(option)}
 							>
-								<Button
-									variant={"ghost"}
-									className="w-full h-full p-0"
-									onClick={() => handleOptionClick(option)}
-								>
-									<span className="flex items-center gap-2">
-										<span className="text-sm">{option.icon}</span>
-										<span>{option.name}</span>
-									</span>
-									<div className="flex items-center gap-2 text-sm">
-										{selectedOption?.id === option.id && <Check size={16} />}
-									</div>
-									<CommandShortcut>{option.value}</CommandShortcut>
-								</Button>
+								<span className="flex items-center gap-2">
+									<span className="text-sm">{option.icon}</span>
+									<span>{option.name}</span>
+								</span>
+								<div className="flex items-center gap-2 text-sm">
+									{selectedOption?.id === option.id && <Check size={16} />}
+								</div>
+								<CommandShortcut>{option.value}</CommandShortcut>
 							</CommandItem>
 						))}
 					</CommandList>

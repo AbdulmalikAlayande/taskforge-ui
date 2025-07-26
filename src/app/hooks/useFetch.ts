@@ -35,5 +35,8 @@ export function useFetch<T>(params: FetchParams) {
 		staleTime: params.staleTime ?? 3_600_000, // Default 1 hour before refetching
 		retry: params.retry ?? 2, // Default to only 1 retry
 		enabled: params.enabled !== false && !!params.url, // Only run if enabled and URL exists
+		refetchOnWindowFocus: false, // Prevent refetch on window focus
+		refetchOnMount: false, // Only fetch once on mount
+		refetchInterval: false,
 	});
 }

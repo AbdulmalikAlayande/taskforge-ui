@@ -1,4 +1,5 @@
 import ProjectDataSelector from "./project-data-selector";
+import React from "react";
 import {
 	Loader,
 	Clock,
@@ -72,11 +73,19 @@ const statusOptions = [
 ];
 
 export function StatusSelector({ onChange }: SelectorProps) {
+	// Memoize the handler to prevent unnecessary re-renders
+	const handleChange = React.useCallback(
+		(id: string) => {
+			onChange(id);
+		},
+		[onChange]
+	);
+
 	return (
 		<ProjectDataSelector
 			selectedId={statusOptions[0].id}
 			options={statusOptions}
-			onChange={onChange}
+			onChange={handleChange}
 			placeholder={"Change status..."}
 			keybinding={["P", "S"]}
 			emptyText="No status"
@@ -120,11 +129,19 @@ const priorityOptions = [
 ];
 
 export function PrioritySelector({ onChange }: SelectorProps) {
+	// Memoize the handler to prevent unnecessary re-renders
+	const handleChange = React.useCallback(
+		(id: string) => {
+			onChange(id);
+		},
+		[onChange]
+	);
+
 	return (
 		<ProjectDataSelector
 			selectedId={priorityOptions[2].id}
 			options={priorityOptions}
-			onChange={onChange}
+			onChange={handleChange}
 			placeholder={"Change priority..."}
 			keybinding={["P", "P"]}
 			emptyText="No priority"
@@ -225,11 +242,19 @@ const categoryOptions = [
 ];
 
 export function CategorySelector({ onChange }: SelectorProps) {
+	// Memoize the handler to prevent unnecessary re-renders
+	const handleChange = React.useCallback(
+		(id: string) => {
+			onChange(id);
+		},
+		[onChange]
+	);
+
 	return (
 		<ProjectDataSelector
 			selectedId={categoryOptions[0].id}
 			options={categoryOptions}
-			onChange={onChange}
+			onChange={handleChange}
 			placeholder={""}
 			keybinding={["P", "C"]}
 			emptyText="No category"
@@ -240,19 +265,31 @@ export function CategorySelector({ onChange }: SelectorProps) {
 }
 
 export function TeamLeadSelector({ onChange }: SelectorProps) {
-	const teamLeadSelectorOptions = [
-		{
-			id: "",
-			name: "",
-			icon: <User />,
-			value: 1,
+	// Memoize the handler to prevent unnecessary re-renders
+	const handleChange = React.useCallback(
+		(id: string) => {
+			onChange(id);
 		},
-	];
+		[onChange]
+	);
+
+	const teamLeadSelectorOptions = React.useMemo(
+		() => [
+			{
+				id: "",
+				name: "",
+				icon: <User />,
+				value: 1,
+			},
+		],
+		[]
+	);
+
 	return (
 		<ProjectDataSelector
 			selectedId={teamLeadSelectorOptions[0].name}
 			options={[]}
-			onChange={onChange}
+			onChange={handleChange}
 			placeholder={"Change team lead"}
 			keybinding={["P", "L"]}
 			emptyText="No user available"

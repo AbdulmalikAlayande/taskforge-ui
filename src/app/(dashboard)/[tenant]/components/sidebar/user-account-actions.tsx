@@ -17,13 +17,19 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@src/components/ui/sidebar";
-import { BadgeCheck, ChevronsUpDown, LogOut, Sparkles } from "lucide-react";
+import {
+	BadgeCheck,
+	ChevronsUpDown,
+	LogOut,
+	Sparkles,
+	User2,
+} from "lucide-react";
 import { Label } from "@src/components/ui/label";
 
 type UserActionsProps = {
 	user: { name: string; email: string; avatar: string };
 };
-export const UserActions = ({ user }: UserActionsProps) => {
+export const UserAccountActions = ({ user }: UserActionsProps) => {
 	const { isMobile } = useSidebar();
 	return (
 		<SidebarMenu>
@@ -34,13 +40,14 @@ export const UserActions = ({ user }: UserActionsProps) => {
 							size={"lg"}
 							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 						>
-							<Avatar className="h-8 w-8 rounded-lg">
+							<Avatar className="size-4 rounded-lg">
 								<AvatarImage src={user.avatar} alt={user.name} />
 								<AvatarFallback className="rounded-lg">
 									{user.name
 										.split(" ")
 										.map((n) => n.charAt(0))
 										.join("")}
+									<User2 />
 								</AvatarFallback>
 							</Avatar>
 							<div className="grid flex-1 text-left text-sm leading-tight">
@@ -48,7 +55,6 @@ export const UserActions = ({ user }: UserActionsProps) => {
 								<span className="truncate text-xs">{user.email}</span>
 							</div>
 							<ChevronsUpDown className="ml-auto size-4" />
-							UserActions
 						</SidebarMenuButton>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent
