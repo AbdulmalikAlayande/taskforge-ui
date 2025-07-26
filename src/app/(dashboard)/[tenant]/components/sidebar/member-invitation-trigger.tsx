@@ -31,6 +31,7 @@ import {
 	DialogTrigger,
 } from "@src/components/ui/dialog";
 import { Controller, useForm } from "react-hook-form";
+import { useUserStorage } from "@src/app/hooks/useUserStorage";
 
 type InvitationRequest = {
 	email: string;
@@ -65,7 +66,7 @@ export const MemberInvitationTrigger = () => {
 	const { apiClient } = useApiClient();
 	const [isLoading, setIsLoading] = React.useState(false);
 	const [isOpen, setIsOpen] = React.useState(false);
-
+	const { getUserData } = useUserStorage();
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
@@ -85,17 +86,41 @@ export const MemberInvitationTrigger = () => {
 			const invitationResponse = await apiClient.post<
 				InvitationResponse,
 				InvitationRequest
-			>("/organization/invite", {
+			>(`${process.env.NEXT_PUBLIC_API_URL}/organization/invite-member`, {
 				...data,
-				invitedBy: "currentUserId",
-				organizationId: "currentOrganizationId",
+				invitedBy: getUserData()?.publicId || "",
+				organizationId:
+					sessionStorage.getItem("current_tenant_id") ||
+					localStorage.getItem("current_tenant_id") ||
+					"",
 			});
 
 			console.log("Invitation sent:", invitationResponse);
 			reset();
 			setIsOpen(false); // Close dialog on success
 		} catch (error) {
-			console.error("Error inviting member:", error);
+			interface ApiError {
+				response?: {
+					data?: unknown;
+				};
+				message?: string;
+			}
+			const err = error as ApiError;
+			if (typeof error === "object" && error !== null) {
+				if (
+					"response" in err &&
+					typeof err.response === "object" &&
+					err.response !== null &&
+					"data" in err.response
+				) {
+					console.error("Error inviting member:", err.response?.data);
+				}
+				if ("message" in err) {
+					console.error("Error inviting member:", err.message);
+				}
+			} else {
+				console.error("Error inviting member:", error);
+			}
 		} finally {
 			setIsLoading(false);
 		}
