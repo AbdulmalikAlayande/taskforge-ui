@@ -153,11 +153,11 @@ const Project = () => {
 		setProject((prev) => {
 			switch (selectorType) {
 				case "status":
-					return { ...prev, status: id as ProjectStatus };
+					return { ...prev, status: id.toUpperCase() as ProjectStatus };
 				case "priority":
-					return { ...prev, priority: id as ProjectPriority };
+					return { ...prev, priority: id.toUpperCase() as ProjectPriority };
 				case "category":
-					return { ...prev, category: id as ProjectCategory };
+					return { ...prev, category: id.toUpperCase() as ProjectCategory };
 				case "lead":
 					return { ...prev, leadId: id };
 				case "member":
@@ -198,8 +198,12 @@ const Project = () => {
 			return;
 		}
 
+		Logger.info("Start Date: ", { startDate });
+		Logger.info("End Date: ", { endDate });
+
 		const projectToSubmit = {
 			...project,
+			organizationId: localStorage.getItem("current_tenant_id") || "",
 			startDate: startDate ? startDate.toISOString() : "",
 			endDate: endDate ? endDate.toISOString() : "",
 		};

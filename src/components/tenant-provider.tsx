@@ -42,7 +42,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
 		try {
 			setIsLoading(true);
 			const response = await apiClient.get<TenantData>(
-				`/api/organization/${tenantId}`
+				`/organization/${tenantId}`
 			);
 
 			if (response) {

@@ -151,21 +151,6 @@ export function PrioritySelector({ onChange }: SelectorProps) {
 	);
 }
 
-/**
- * 	BUILDING = "BUILDING",
-	SOFTWARE = "SOFTWARE",
-	DESIGN = "DESIGN",
-	MARKETING = "MARKETING",
-	SALES = "SALES",
-	HUMAN_RESOURCES = "HUMAN_RESOURCES",
-	FINANCE = "FINANCE",
-	OPERATIONS = "OPERATIONS",
-	LEGAL = "LEGAL",
-	IT_SUPPORT = "IT_SUPPORT",
-	ENTERTAINMENT = "ENTERTAINMENT",
-	OTHER = "OTHER",
- */
-
 const categoryOptions = [
 	{
 		id: "building",

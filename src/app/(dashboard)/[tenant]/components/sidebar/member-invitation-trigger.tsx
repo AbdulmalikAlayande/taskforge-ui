@@ -32,6 +32,8 @@ import {
 } from "@src/components/ui/dialog";
 import { Controller, useForm } from "react-hook-form";
 import { useUserStorage } from "@src/app/hooks/useUserStorage";
+import { toast } from "sonner";
+import Logger from "@src/lib/logger";
 
 type InvitationRequest = {
 	email: string;
@@ -81,8 +83,6 @@ export const MemberInvitationTrigger = () => {
 	async function inviteMember(data: z.infer<typeof FormSchema>) {
 		setIsLoading(true);
 		try {
-			console.log("Inviting:", data);
-
 			const invitationResponse = await apiClient.post<
 				InvitationResponse,
 				InvitationRequest
@@ -113,13 +113,23 @@ export const MemberInvitationTrigger = () => {
 					err.response !== null &&
 					"data" in err.response
 				) {
-					console.error("Error inviting member:", err.response?.data);
+					toast.error("An unknown error occured", {
+						description: err.response.data as string,
+					});
+					Logger.error("Error inviting member:", {
+						"Error Response Data": err.response?.data,
+					});
 				}
 				if ("message" in err) {
-					console.error("Error inviting member:", err.message);
+					toast.error("An unknown error occured", {
+						description: err.message,
+					});
+					Logger.error("Error inviting member:", {
+						"Error Message: ": err.message,
+					});
 				}
 			} else {
-				console.error("Error inviting member:", error);
+				Logger.error("Error inviting member:", { error });
 			}
 		} finally {
 			setIsLoading(false);
@@ -138,14 +148,9 @@ export const MemberInvitationTrigger = () => {
 					</CardHeader>
 					<CardContent className="flex items-center justify-center px-4">
 						<Dialog open={isOpen} onOpenChange={setIsOpen}>
-							<DialogTrigger className="w-full">
-								<Button
-									size="sm"
-									className="w-full flex items-center-safe bg-sidebar-primary text-sidebar-primary-foreground shadow-none"
-								>
-									<MailIcon className="mr-2" />
-									Invite Member
-								</Button>
+							<DialogTrigger className="w-full flex items-center-safe bg-sidebar-primary text-sidebar-primary-foreground shadow-none hover:bg-primary/90 cursor-pointer h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5">
+								<MailIcon className="mr-2" />
+								Invite Member
 							</DialogTrigger>
 							<DialogContent className="w-full max-w-md h-80 px-0 gap-2">
 								<DialogHeader className="w-full px-4">

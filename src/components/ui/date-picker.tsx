@@ -45,6 +45,8 @@ const DatePicker = (props: DatePickerProps) => {
 		if (event.key === "ArrowDown") {
 			event.preventDefault();
 			setPopoverOpen(true);
+		} else {
+			Logger.info("event.key is not equals ArrowDown");
 		}
 	}
 
@@ -71,10 +73,20 @@ const DatePicker = (props: DatePickerProps) => {
 					size={"sm"}
 					className="h-6 p-0 m-0"
 				>
-					<span className="w-full h-full flex items-center justify-between rounded-md gap-2">
-						{props.title}
-					</span>
-					<CalendarIcon size={20} />{" "}
+					{date ? (
+						<React.Fragment>
+							<span className="w-full h-full flex items-center justify-between rounded-md gap-2 border-primary text-primary">
+								{`${date}`}
+							</span>
+						</React.Fragment>
+					) : (
+						<React.Fragment>
+							<span className="w-full h-full flex items-center justify-between rounded-md gap-2">
+								{props.title}
+							</span>
+							<CalendarIcon size={20} />{" "}
+						</React.Fragment>
+					)}
 					<span className="sr-only">Select date</span>
 				</Button>
 			</PopoverTrigger>
