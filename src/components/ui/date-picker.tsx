@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { Popover, PopoverTrigger, PopoverContent } from "./popover";
 import { Button } from "./button";
-// import { Label } from "./label";
-import { Calendar } from "./calendar";
 import { Input } from "./input";
 import { parseDate } from "chrono-node";
 import { CalendarIcon } from "lucide-react";
 import Logger from "@src/lib/logger";
 import { toast } from "sonner";
+import { Calendar } from "./calendar";
+import { useIsMobile } from "@src/app/hooks/use-mobile";
 
 type DatePickerProps = {
-	selectedDate: Date;
+	selectedDate: Date | undefined;
 	setSelectedDate: (date: Date) => void;
 	triggerIcon: React.ReactNode | React.ReactElement; // | React.ElementType;
 	triggerLabel?: string;
@@ -30,15 +30,12 @@ function formatDate(date: Date | undefined) {
 }
 
 const DatePicker = (props: DatePickerProps) => {
+	const isMobile = useIsMobile();
 	const [naturalLanguage, setNaturalLanguage] = useState("");
-	const [date, setDate] = useState(parseDate(naturalLanguage));
-	const [month, setMonth] = useState(date);
 	const [popoverOpen, setPopoverOpen] = useState(false);
 	const parseNaturalLanguage = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setNaturalLanguage(event.target.value);
 		const date = parseDate(event.target.value);
-		setDate(date);
-		setMonth(date);
 		props.setSelectedDate(date || new Date());
 	};
 	function openPopover(event: React.KeyboardEvent<HTMLInputElement>): void {
@@ -73,20 +70,34 @@ const DatePicker = (props: DatePickerProps) => {
 					size={"sm"}
 					className="h-6 p-0 m-0"
 				>
-					{date ? (
-						<React.Fragment>
-							<span className="w-full h-full flex items-center justify-between rounded-md gap-2 border-primary text-primary">
-								{`${date}`}
-							</span>
-						</React.Fragment>
-					) : (
-						<React.Fragment>
-							<span className="w-full h-full flex items-center justify-between rounded-md gap-2">
-								{props.title}
-							</span>
-							<CalendarIcon size={20} />{" "}
-						</React.Fragment>
-					)}
+					<span
+						className={
+							isMobile
+								? `${props.selectedDate && "border-primary text-primary"} inline-flex items-center rounded border bg-muted px-1 py-1 text-xs font-mono font-medium text-muted-foreground`
+								: `flex items-center justify-between rounded-md px-2 gap-2`
+						}
+					>
+						{isMobile ? (
+							<CalendarIcon size={20} />
+						) : (
+							<>
+								{props.selectedDate ? (
+									<React.Fragment>
+										<span className="w-full h-full flex items-center justify-between rounded-md gap-2 border-primary text-primary">
+											{formatDate(props.selectedDate)}
+										</span>
+									</React.Fragment>
+								) : (
+									<React.Fragment>
+										<span className="w-full h-full flex items-center justify-between rounded-md gap-2">
+											{props.title}
+										</span>
+										<CalendarIcon size={20} />
+									</React.Fragment>
+								)}
+							</>
+						)}
+					</span>
 					<span className="sr-only">Select date</span>
 				</Button>
 			</PopoverTrigger>
@@ -107,16 +118,20 @@ const DatePicker = (props: DatePickerProps) => {
 				</div>
 				<Calendar
 					mode="single"
+					autoFocus
+					captionLayout="dropdown"
 					className="w-full bg-amber-700 px-0"
 					selected={props.selectedDate}
-					captionLayout="dropdown"
-					month={month ? month : undefined}
-					onMonthChange={setMonth}
+					onDayClick={() => setPopoverOpen(false)}
 					onSelect={handleDateSelection(
 						props,
 						setNaturalLanguage,
 						setPopoverOpen
 					)}
+					disabled={(date) =>
+						Number(date) < Date.now() - 1000 * 60 * 60 * 24 ||
+						Number(date) > Date.now() + 1000 * 60 * 60 * 24 * 30
+					}
 				/>
 			</PopoverContent>
 		</Popover>

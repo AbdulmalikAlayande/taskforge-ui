@@ -2,6 +2,7 @@
 import axios from "axios";
 import chalk from "chalk";
 import { format } from "date-fns";
+import { config, getApiUrl } from "./config";
 
 /**
  * Logger utility to handle different logging styles.
@@ -67,15 +68,16 @@ class Logger {
 		message: string,
 		data?: object
 	): void {
-		// if (process.env.PROD === true) {
-		axios.post(
-			`${process.env.NEXT_PUBLIC_API_URL}/logs/create-new`,
-			{ message, level, meta: data },
-			{
-				headers: { "Content-Type": "application/json" },
-			}
-		);
-		// }
+		// Only send logs to server if logging is enabled
+		if (config.features.enableLogging) {
+			axios.post(
+				getApiUrl("/logs/create-new"),
+				{ message, level, meta: data },
+				{
+					headers: { "Content-Type": "application/json" },
+				}
+			);
+		}
 	}
 }
 

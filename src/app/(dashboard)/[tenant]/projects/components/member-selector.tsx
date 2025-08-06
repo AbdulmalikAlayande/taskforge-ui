@@ -12,6 +12,8 @@ import { Button } from "@src/components/ui/button";
 import React from "react";
 import { List, ListItem } from "@src/components/ui/list";
 import { Checkbox } from "@src/components/ui/checkbox";
+import { useIsMobile } from "@src/app/hooks/use-mobile";
+import { getApiUrl } from "@src/lib/config";
 
 type MemberSelectorOption = {
 	id: string;
@@ -25,6 +27,7 @@ type MemberSelectorProps = {
 	onChange: (id: string) => void;
 };
 export function MemberSelector({ onChange }: MemberSelectorProps) {
+	const isMobile = useIsMobile();
 	const { tenantId } = useTenant();
 	const [selectedMembers, setSelectedMembers] = React.useState<
 		MemberSelectorOption[]
@@ -32,7 +35,7 @@ export function MemberSelector({ onChange }: MemberSelectorProps) {
 
 	const fetchConfig = React.useMemo(
 		() => ({
-			url: `${process.env.NEXT_PUBLIC_API_URL}/organization/${tenantId}/members`,
+			url: `/organization/${tenantId}/members`,
 			queryKey: [`members-${tenantId}`],
 			enabled: !!tenantId,
 		}),
@@ -45,21 +48,37 @@ export function MemberSelector({ onChange }: MemberSelectorProps) {
 		<Popover>
 			<PopoverTrigger asChild>
 				<Button variant="outline" size="sm" className="h-6 gap-2 p-0">
-					{selectedMembers.length > 0 ? (
-						selectedMembers.map((member) => (
-							<span key={member.id} className="flex items-center gap-2">
-								{React.isValidElement(member.icon)
-									? member.icon
-									: React.createElement(member.icon)}
-								{member.name}
-							</span>
-						))
-					) : (
-						<>
-							<Users2 />
-							<span>Members</span>
-						</>
-					)}
+					{/* className={
+ 
+					*/}
+					<span
+						className={
+							isMobile
+								? `inline-flex items-center rounded border bg-muted px-1 py-1 text-xs font-mono font-medium text-muted-foreground`
+								: `flex items-center justify-between rounded-md px-2 gap-2`
+						}
+					>
+						{selectedMembers.length > 0 ? (
+							selectedMembers.map((member) => (
+								<span key={member.id} className="flex items-center gap-2">
+									{React.isValidElement(member.icon)
+										? member.icon
+										: React.createElement(member.icon)}
+									{member.name}
+								</span>
+							))
+						) : (
+							<>
+								{isMobile ? (
+									<Users2 />
+								) : (
+									<span className="w-full h-full flex items-center justify-between rounded-md gap-2">
+										<Users2 /> <span>Members</span>
+									</span>
+								)}
+							</>
+						)}
+					</span>
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent

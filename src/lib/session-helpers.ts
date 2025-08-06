@@ -14,7 +14,7 @@ export async function loginAndUpdateSession(
 	updateSession: (data?: Session | null) => Promise<Session | null>
 ) {
 	const response = await apiClient.post<LoginResponse, LoginRequest>(
-		`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+		`/api/auth/login`,
 		request
 	);
 

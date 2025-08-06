@@ -35,7 +35,6 @@ import {
 	DialogFooter,
 } from "@src/components/ui/dialog";
 import { Input } from "@src/components/ui/input";
-import { ScrollArea, ScrollBar } from "@src/components/ui/scroll-area";
 import {
 	StatusSelector,
 	PrioritySelector,
@@ -53,6 +52,7 @@ import {
 	ProjectStatus,
 } from "@src/lib/request-types";
 import { ProjectResponse } from "@src/lib/response-types";
+import { toast } from "sonner";
 
 const defaultOrganizationData = {
 	publicId: "",
@@ -86,8 +86,9 @@ const Project = () => {
 	const userId = searchParams.get("uid");
 	const { apiClient } = useApiClient();
 	const { getOrganization } = useIndexedDB();
-	const [startDate, setStartDate] = useState<Date | null>(null);
-	const [endDate, setEndDate] = useState<Date | null>(new Date());
+	const [startDate, setStartDate] = useState<Date>();
+	const [endDate, setEndDate] = useState<Date>();
+	const [dialogOpen, setDialogOpen] = useState(false);
 	const [organization, setOrganization] = useState<OrganizationResponse>(
 		defaultOrganizationData
 	);
@@ -96,7 +97,7 @@ const Project = () => {
 	const fetchConfig = useMemo(
 		() => ({
 			enabled: !!tenantId,
-			url: `${process.env.NEXT_PUBLIC_API_URL!}/organization/${tenantId}`,
+			url: `/organization/${tenantId}`,
 			queryKey: [`organization-${tenantId}`],
 			retry: 3,
 			refetchOnWindowFocus: false,
@@ -212,20 +213,39 @@ const Project = () => {
 
 		apiClient
 			.post<ProjectResponse, ProjectRequest>(
-				`${process.env.NEXT_PUBLIC_API_URL}/project/create-new`,
+				`/project/create-new`,
 				projectToSubmit
 			)
 			.then((response) => {
 				Logger.debug("Project created successfully:", { response });
-				// Reset the form or redirect to the new project
+				toast.success("Project created successfully!", {
+					duration: 3000,
+					position: "top-right",
+					description: `Project "${response.name}" has been created.`,
+					style: {
+						backgroundColor: "#f0fff4",
+						color: "#16a34a",
+					},
+				});
 				setProject(defaultProjectData);
-				setStartDate(null);
-				setEndDate(null);
-				// Close the dialog or redirect
+				setStartDate(undefined);
+				setEndDate(undefined);
+
+				setDialogOpen(false);
+				// Optionally, you can also refresh the project list or redirect to the new project page
+				// window.location.href = `/projects/${response.id}`;
 			})
 			.catch((error) => {
-				Logger.error("Failed to create project:", { error: String(error) });
-				alert("Failed to create project. Please try again.");
+				Logger.error("Failed to create project:", { error });
+				toast.error("Failed to create project. Please try again.", {
+					duration: 3000,
+					position: "top-right",
+					description: "There was an error creating the project.",
+					style: {
+						backgroundColor: "#fee2e2",
+						color: "#b91c1c",
+					},
+				});
 			});
 	}
 
@@ -280,138 +300,148 @@ const Project = () => {
 							and may span across multiple teams or departments.
 						</TypographyP>
 
-						<div className="mt-4 w-full flex justify-start h-[80px]">
-							<Dialog>
+						<div className="mt-4 w-full flex justify-start">
+							<Dialog
+								open={dialogOpen}
+								onOpenChange={() => {
+									setDialogOpen(!dialogOpen);
+									setStartDate(undefined);
+									setEndDate(undefined);
+								}}
+							>
 								<DialogTrigger asChild>
 									<Button variant={"default"} size={"sm"}>
 										Create new project
 									</Button>
 								</DialogTrigger>
-								<DialogContent className="sm:max-w-120 md:max-w-170 lg:max-w-220 sm:max-h-150 w-400 h-140">
-									<ScrollArea className="h-full max-h-[80vh] w-full p-6">
-										<DialogHeader className="flex flex-col gap-4 mb-4">
-											<DialogTitle className="text-lg">New project</DialogTitle>
-											<DialogDescription className="w-full flex items-center gap-2 text-sm font-medium break-words whitespace-normal">
-												Provide a name, summary, and details for your new
-												project. Projects help you organize tasks, milestones,
-												and team members around a specific goal or initiative.
-											</DialogDescription>
-										</DialogHeader>
-										<div className="w-full flex flex-col gap-4">
-											<span className="bg-accent flex items-center justify-center rounded-sm w-8 h-8 text-muted-foreground">
-												<Box size={20} className="text-muted-foreground" />
-											</span>
-											<div className="w-full flex flex-col gap-2">
-												<Input
-													variant={"minimal"}
-													placeholder="Project name: 'Launch v2.0', 'Revamp onboarding'"
-													name="project_name"
-													value={project.name}
-													onChange={(e) =>
-														setProject((prev) => ({
-															...prev,
-															name: e.target.value,
-														}))
-													}
-													className="h-8 text-lg md:text-xl font-semibold p-2 border-none shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-												/>
-												<Input
-													variant={"minimal"}
-													placeholder="Add a short summary..."
-													name="summary"
-													value={project.summary}
-													onChange={(e) =>
-														setProject((prev) => ({
-															...prev,
-															summary: e.target.value,
-														}))
-													}
-													className="text-sm font-semibold p-2 border-none shadow-none bg-transparent text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
-												/>
-											</div>
+								{/* 
+								w-full sm:max-w-md md:max-w-lg lg:max-w-xl max-h-[90vh]
+								max-w-[95vw] sm:w-[500px] max-h-[90vh]
+								sm:max-w-120 md:max-w-170 lg:max-w-220 sm:max-h-150 w-400 h-140
+								w-[100vh] max-w-[95vw] max-h-[90vh]
+								*/}
 
-											{/* Project metadata options */}
-											<div className="flex gap-2 text-sm">
-												<StatusSelector
-													onChange={(id) => handleOptionClick(id, "status")}
-												/>
-												<PrioritySelector
-													onChange={(id) => handleOptionClick(id, "priority")}
-												/>
-												<CategorySelector
-													onChange={(id) => handleOptionClick(id, "category")}
-												/>
-												<TeamLeadSelector
-													onChange={(id) => handleOptionClick(id, "lead")}
-												/>
-												<MemberSelector
-													onChange={(id) => handleOptionClick(id, "member")}
-												/>
-												<DatePicker
-													triggerLabel="Start"
-													triggerIcon={<Calendar size={14} />}
-													selectedDate={startDate || new Date()}
-													setSelectedDate={(date: Date) => {
-														setStartDate(date);
-														setProject((prev) => ({
-															...prev,
-															startDate: date.toISOString(),
-														}));
-													}}
-													title="Start"
-												/>
-												<DatePicker
-													triggerLabel="Target"
-													triggerIcon={<Calendar size={14} />}
-													selectedDate={endDate || new Date()}
-													setSelectedDate={(date: Date) => {
-														setEndDate(date);
-														setProject((prev) => ({
-															...prev,
-															endDate: date.toISOString(),
-														}));
-													}}
-													title="Target"
-												/>
-											</div>
-											<Separator className="mt-2" />
+								<DialogContent className="p-4 overflow-auto rounded-xl w-[700px] max-w-[95vw]">
+									<DialogHeader className="flex flex-col gap-4 mb-4">
+										<DialogTitle className="w-full text-lg text-left">
+											New project
+										</DialogTitle>
+										<DialogDescription className="w-full flex items-center gap-2 text-sm sm:text-xs font-medium break-words text-left whitespace-normal">
+											Provide a name, summary, and details for your new project.
+											Projects help you organize tasks, milestones, and team
+											members around a specific goal or initiative.
+										</DialogDescription>
+									</DialogHeader>
+									<div className="w-full flex flex-col gap-4">
+										<span className="bg-accent flex items-center justify-center rounded-sm w-8 h-8 text-muted-foreground">
+											<Box size={20} className="text-muted-foreground" />
+										</span>
+										<div className="w-full flex flex-col gap-2">
+											<Input
+												variant={"minimal"}
+												placeholder="Project name: 'Launch v2.0', 'Revamp onboarding'"
+												name="project_name"
+												value={project.name}
+												onChange={(e) =>
+													setProject((prev) => ({
+														...prev,
+														name: e.target.value,
+													}))
+												}
+												className="h-8 text-lg md:text-xl font-semibold p-2 border-none shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+											/>
+											<Input
+												variant={"minimal"}
+												placeholder="Add a short summary..."
+												name="summary"
+												value={project.summary}
+												onChange={(e) =>
+													setProject((prev) => ({
+														...prev,
+														summary: e.target.value,
+													}))
+												}
+												className="text-sm font-semibold p-2 border-none shadow-none bg-transparent text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+											/>
+										</div>
 
-											{/* Description area */}
-											<div className="">
-												<textarea
-													placeholder="Write a description, a project brief, or collect ideas..."
-													value={project.description}
-													onChange={(e) =>
-														setProject((prev) => ({
-															...prev,
-															description: e.target.value,
-														}))
-													}
-													className="w-full min-h-[120px] bg-transparent border-none focus:outline-none resize-none text-sm text-muted-foreground"
-												/>
-											</div>
+										{/* Project metadata options */}
+										<div className="flex gap-2 text-sm">
+											<StatusSelector
+												onChange={(id) => handleOptionClick(id, "status")}
+											/>
+											<PrioritySelector
+												onChange={(id) => handleOptionClick(id, "priority")}
+											/>
+											<CategorySelector
+												onChange={(id) => handleOptionClick(id, "category")}
+											/>
+											<TeamLeadSelector
+												onChange={(id) => handleOptionClick(id, "lead")}
+											/>
+											<MemberSelector
+												onChange={(id) => handleOptionClick(id, "member")}
+											/>
+											<DatePicker
+												triggerLabel="Start"
+												triggerIcon={<Calendar size={14} />}
+												selectedDate={startDate}
+												setSelectedDate={(date: Date) => {
+													setStartDate(date);
+													setProject((prev) => ({
+														...prev,
+														startDate: date.toISOString(),
+													}));
+												}}
+												title="Start"
+											/>
+											<DatePicker
+												triggerLabel="Target"
+												triggerIcon={<Calendar size={14} />}
+												selectedDate={endDate}
+												setSelectedDate={(date: Date) => {
+													setEndDate(date);
+													setProject((prev) => ({
+														...prev,
+														endDate: date.toISOString(),
+													}));
+												}}
+												title="Target"
+											/>
+										</div>
+										<Separator className="mt-2" />
 
-											{/* Milestones section
+										{/* Description area */}
+										<div className="">
+											<textarea
+												placeholder="Write a description, a project brief, or collect ideas..."
+												value={project.description}
+												onChange={(e) =>
+													setProject((prev) => ({
+														...prev,
+														description: e.target.value,
+													}))
+												}
+												className="w-full min-h-[120px] bg-transparent border-none focus:outline-none resize-none text-sm text-muted-foreground"
+											/>
+										</div>
+
+										{/* Milestones section
 											<div className="flex justify-between items-center mt-6 py-2 border-t">
 												<h3 className="text-sm font-medium">Milestones</h3>
 												<Button variant="ghost" size="sm">
 													<span className="text-xl">+</span>
 												</Button>
 											</div> */}
+									</div>
+									{/* Dialog footer */}
+									<DialogFooter className="flex-shrink-0 pt-4 border-t">
+										<div className="flex flex-row justify-end items-center gap-2 w-full">
+											<Button onClick={createProject} type="submit">
+												Create project
+											</Button>
 										</div>
-										{/* Dialog footer */}
-										<DialogFooter>
-											<div className="flex justify-end gap-2 mt-6">
-												<Button variant="outline" type="button">
-													Cancel
-												</Button>
-												<Button onClick={createProject} type="submit">
-													Create project
-												</Button>
-											</div>
-										</DialogFooter>
-										<ScrollBar orientation={"vertical"} />
-									</ScrollArea>
+									</DialogFooter>
 								</DialogContent>
 							</Dialog>
 						</div>

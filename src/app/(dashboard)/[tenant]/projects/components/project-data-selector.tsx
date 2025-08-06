@@ -16,6 +16,7 @@ import {
 	CommandShortcut,
 } from "@src/components/ui/command";
 import { Kbd } from "@src/components/ui/kbd";
+import { useIsMobile } from "@src/app/hooks/use-mobile";
 
 type ProjectDataSelectorOption = {
 	id: string;
@@ -37,6 +38,7 @@ type ProjectDataSelectorProps = {
 };
 
 const ProjectDataSelector = (props: ProjectDataSelectorProps) => {
+	const isMobile = useIsMobile();
 	const [selectedOption, setSelectedOption] =
 		useState<ProjectDataSelectorOption>();
 
@@ -49,7 +51,13 @@ const ProjectDataSelector = (props: ProjectDataSelectorProps) => {
 		<Popover>
 			<PopoverTrigger asChild>
 				<Button variant="outline" size="sm" className="h-6 text-sm gap-2 p-0">
-					{selectedOption ? (
+					{isMobile ? (
+						<span
+							className={`${selectedOption?.icon && "border-primary text-primary"} inline-flex items-center rounded border bg-muted px-1 py-1 text-xs font-mono font-medium text-muted-foreground`}
+						>
+							{selectedOption?.icon ? selectedOption?.icon : props.labelIcon}
+						</span>
+					) : selectedOption ? (
 						<span className="w-full h-full flex items-center justify-between gap-2 px-2 border-primary text-primary">
 							<span>{selectedOption.icon}</span>
 							<span>{selectedOption.name}</span>

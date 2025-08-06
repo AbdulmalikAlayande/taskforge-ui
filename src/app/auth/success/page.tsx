@@ -6,13 +6,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Logger from "@src/lib/logger";
 import { useUserStorage } from "@src/app/hooks/useUserStorage";
-import useIndexedDB from "@src/lib/useIndexedDB";
 
 export default function AuthSuccessPage() {
 	const { data: session, status } = useSession();
 	const router = useRouter();
 	const { getUserData } = useUserStorage();
-	const { getOrganization } = useIndexedDB();
 
 	const userData = getUserData();
 
@@ -68,8 +66,9 @@ export default function AuthSuccessPage() {
 						localStorage.getItem("user_id") ||
 						sessionStorage.getItem("user_id");
 
-					const organization = await getOrganization("");
-					const tenantId = organization?.publicId;
+					const tenantId =
+						localStorage.getItem("current_tenant_id") ||
+						sessionStorage.getItem("current_tenant_id");
 					router.push(`/${tenantId}/projects?uid=${userId}`);
 				} else {
 					Logger.warning("Unknown auth intent", { authIntent });

@@ -6,6 +6,7 @@ import { LoginResponse } from "./response-types";
 import { Session } from "next-auth";
 import Logger from "./logger";
 import { Cuboid, Club } from "lucide-react";
+import { getApiUrl } from "./config";
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -19,10 +20,9 @@ export async function login(
 		Logger.debug(`Login function called with email: ${request.email}`);
 
 		const response = await apiClient.post<LoginResponse, LoginRequest>(
-			`${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+			getApiUrl("/auth/login"),
 			request
 		);
-
 		if (!response) {
 			throw new Error("Login failed: Empty response from server");
 		}

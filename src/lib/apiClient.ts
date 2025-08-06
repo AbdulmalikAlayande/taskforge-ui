@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import Logger from "./logger";
+import { config } from "./config";
 
 export class ApiError extends Error {
 	public status: number;
@@ -25,17 +26,18 @@ class ApiClient {
 	private baseUrl: string;
 	private errorHandler?: (error: ApiError) => void;
 
-	constructor(baseUrl: string, config: AxiosRequestConfig = {}) {
-		this.baseUrl = baseUrl;
+	constructor(baseUrl?: string, axiosConfig: AxiosRequestConfig = {}) {
+		// Use provided baseUrl or fall back to config
+		this.baseUrl = baseUrl || config.api.baseUrl;
 
 		this.client = axios.create({
 			baseURL: this.baseUrl,
-			timeout: 30_000,
-			...config,
+			timeout: config.api.timeout,
+			...axiosConfig,
 			headers: {
 				Accept: "application/json",
 				"Content-Type": "application/json",
-				...config.headers,
+				...axiosConfig.headers,
 			},
 		});
 
@@ -164,6 +166,11 @@ class ApiClient {
 	}
 }
 
-export const apiClient = new ApiClient(
-	process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api"
-);
+export const apiClient = new ApiClient();
+
+export const createApiClient = (
+	baseUrl?: string,
+	axiosConfig?: AxiosRequestConfig
+) => new ApiClient(baseUrl, axiosConfig);
+
+export const getCurrentApiUrl = () => config.api.baseUrl;
