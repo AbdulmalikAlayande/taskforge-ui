@@ -13,7 +13,6 @@ import React from "react";
 import { List, ListItem } from "@src/components/ui/list";
 import { Checkbox } from "@src/components/ui/checkbox";
 import { useIsMobile } from "@src/app/hooks/use-mobile";
-import { getApiUrl } from "@src/lib/config";
 
 type MemberSelectorOption = {
 	id: string;

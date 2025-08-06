@@ -168,9 +168,11 @@ class ApiClient {
 
 export const apiClient = new ApiClient();
 
+// Export a function to create new instances with different base URLs
 export const createApiClient = (
 	baseUrl?: string,
 	axiosConfig?: AxiosRequestConfig
 ) => new ApiClient(baseUrl, axiosConfig);
 
+// Export utility to get current API base URL
 export const getCurrentApiUrl = () => config.api.baseUrl;

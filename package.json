@@ -6,11 +6,7 @@
 		"dev": "next dev --turbopack",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint",
-		"env:dev": "node scripts/switch-env.js dev",
-		"env:prod": "node scripts/switch-env.js prod",
-		"env:status": "node scripts/switch-env.js status",
-		"env:help": "node scripts/switch-env.js help"
+		"lint": "next lint"
 	},
 	"dependencies": {
 		"@fontsource/inter": "^5.2.6",

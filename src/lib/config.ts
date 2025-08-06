@@ -6,6 +6,8 @@
  * switching between development and production environments.
  */
 
+import Logger from "./logger";
+
 export interface AppConfig {
 	// API Configuration
 	api: {
@@ -74,7 +76,7 @@ function getApiBaseUrl(): string {
 		case "production":
 			return (
 				process.env.NEXT_PUBLIC_PROD_API_URL ||
-				"https://taskforge-f4v0.onrender.com/api"
+				"https://your-production-api.com/api"
 			);
 		case "development":
 			return process.env.NEXT_PUBLIC_DEV_API_URL || "http://localhost:8080/api";
@@ -88,31 +90,9 @@ function getApiBaseUrl(): string {
 }
 
 /**
- * Validate required environment variables
- */
-function validateEnvVars(): void {
-	const requiredVars = [
-		"NEXTAUTH_SECRET",
-		"GITHUB_CLIENT_ID",
-		"GITHUB_CLIENT_SECRET",
-	];
-
-	const missingVars = requiredVars.filter((varName) => !process.env[varName]);
-
-	if (missingVars.length > 0) {
-		throw new Error(
-			`Missing required environment variables: ${missingVars.join(", ")}`
-		);
-	}
-}
-
-/**
  * Create and export the application configuration
  */
 function createConfig(): AppConfig {
-	// Validate environment variables first
-	validateEnvVars();
-
 	const isDevelopment = process.env.NODE_ENV === "development";
 	const isProduction = process.env.NODE_ENV === "production";
 	const isTest = process.env.NODE_ENV === "test";
