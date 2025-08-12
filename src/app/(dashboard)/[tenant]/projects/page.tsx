@@ -12,7 +12,6 @@ import { OrganizationResponse } from "@src/lib/response-types";
 import useIndexedDB from "@src/lib/useIndexedDB";
 import { Boxes, ListFilter, SlidersHorizontal } from "lucide-react";
 import { Button } from "@src/components/ui/button";
-import { Label } from "@src/components/ui/label";
 import { TypographyP } from "@src/components/ui/typography";
 import {
 	Popover,
@@ -20,6 +19,8 @@ import {
 	PopoverContent,
 } from "@src/components/ui/popover";
 import { CreateProjectDialog } from "./components/create-project-popover";
+import { DescriptionItem, DescriptionList } from "@src/components/ui/list";
+import { Label } from "@src/components/ui/label";
 
 const defaultOrganizationData = {
 	publicId: "",
@@ -151,7 +152,26 @@ const Project = () => {
 
 						<CreateProjectDialog tenantId={tenantId} />
 					</div>
-					{/* Your project content will go here */}
+					<DescriptionList>
+						<DescriptionItem term="Name" description={organization.name} />
+						<DescriptionItem
+							term="Industry"
+							description={organization.industry}
+						/>
+						<DescriptionItem
+							term="Country"
+							description={organization.country}
+						/>
+						<DescriptionItem term="Phone" description={organization.phone} />
+						<DescriptionItem
+							term="Time Zone"
+							description={organization.timeZone}
+						/>
+						<DescriptionItem
+							term="Website"
+							description={organization.websiteUrl}
+						/>
+					</DescriptionList>
 				</div>
 			</SidebarInset>
 		</SidebarProvider>
