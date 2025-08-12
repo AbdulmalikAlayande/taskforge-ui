@@ -34,6 +34,7 @@ const defaultOrganizationData = {
 	timeZone: "",
 	websiteUrl: "",
 	logoUrl: "",
+	projects: [],
 };
 
 const Project = () => {
@@ -108,7 +109,10 @@ const Project = () => {
 				} as React.CSSProperties
 			}
 		>
-			<AppSidebar variant={"inset"} />
+			<AppSidebar
+				sidebarProps={{ variant: "inset" }}
+				organization={organization}
+			/>
 			<SidebarInset>
 				<AppNavbar section={"Projects"} />
 				<div className="w-full border-b flex justify-between items-center p-2">

@@ -84,6 +84,7 @@ export interface OrganizationResponse {
 	timeZone?: string;
 	websiteUrl?: string;
 	logoUrl?: string;
+	projects: ProjectResponse[];
 }
 
 export interface ProjectResponse {
@@ -100,6 +101,51 @@ export interface ProjectResponse {
 	category: string;
 	createdAt: Date;
 	updatedAt: Date;
+}
+
+export interface MemberResponse {
+	publicId: string;
+}
+
+export enum TaskCategory {
+	BUG = "BUG",
+	FEATURE = "FEATURE",
+	IMPROVEMENT = "IMPROVEMENT",
+	RESEARCH = "RESEARCH",
+}
+
+export enum TaskPriority {
+	LOW = "LOW",
+	MEDIUM = "MEDIUM",
+	HIGH = "HIGH",
+	CRITICAL = "CRITICAL",
+}
+
+export enum TaskStatus {
+	TODO = "TODO",
+	IN_PROGRESS = "IN_PROGRESS",
+	DONE = "DONE",
+	ARCHIVED = "ARCHIVED",
+}
+
+export interface TaskResponse {
+	pinned: boolean;
+	title: string;
+	publicId: string;
+	projectId: string;
+	assigneeId: string;
+	assignee: MemberResponse;
+	description: string;
+	organizationId: string;
+	createdAt: string;
+	lastModifiedAt: string;
+	completedAt: string;
+	dueDate: string;
+	startDate: string;
+
+	status: TaskStatus;
+	priority: TaskPriority;
+	category: TaskCategory;
 }
 
 export interface ApiErrorResponse {

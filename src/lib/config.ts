@@ -74,7 +74,7 @@ function getApiBaseUrl(): string {
 		case "production":
 			return (
 				process.env.NEXT_PUBLIC_PROD_API_URL ||
-				"https://your-production-api.com/api"
+				"https://taskforge-f4v0.onrender.com/api"
 			);
 		case "development":
 			return process.env.NEXT_PUBLIC_DEV_API_URL || "http://localhost:8080/api";
@@ -103,7 +103,7 @@ function createConfig(): AppConfig {
 		},
 
 		auth: {
-			nextAuthUrl: process.env.NEXTAUTH_URL || "http://localhost:3000",
+			nextAuthUrl: process.env.NEXTAUTH_URL!,
 			nextAuthSecret: process.env.NEXTAUTH_SECRET!,
 			providers: {
 				github: {
