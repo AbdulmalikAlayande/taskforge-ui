@@ -13,7 +13,7 @@ import {
 	CardDescription,
 	CardContent,
 } from "@src/components/ui/card";
-import { FaGoogle, FaMeta, FaApple, FaGithub } from "react-icons/fa6";
+import { FaGoogle, FaGithub } from "react-icons/fa6";
 import { cn, login } from "@src/lib/utils";
 import { Input } from "@src/components/ui/input";
 import Link from "next/link";
@@ -67,7 +67,9 @@ export function LoginForm({
 					const response = await login(data, update);
 					Logger.success("Login was successful", response);
 				} catch (loginError) {
-					Logger.error("Login after signup failed:", {
+					toast.error("Login failed.");
+					console.error("Login error:", loginError);
+					Logger.error("Login failed:", {
 						error:
 							loginError instanceof Error
 								? loginError.message
@@ -151,20 +153,6 @@ export function LoginForm({
 								type="button"
 								variant="outline"
 								className="w-full border border-border hover:border-border/80 hover:bg-accent/50 text-foreground font-medium h-12 transition-all duration-200"
-								onClick={() => handleSocialLogin("apple")}
-								disabled={socialLoading === "apple"}
-							>
-								{socialLoading === "apple" ? (
-									<div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-								) : (
-									<FaApple className="w-5 h-5" />
-								)}
-								Login with Apple
-							</Button>
-							<Button
-								type="button"
-								variant="outline"
-								className="w-full border border-border hover:border-border/80 hover:bg-accent/50 text-foreground font-medium h-12 transition-all duration-200"
 								onClick={() => handleSocialLogin("google")}
 								disabled={socialLoading === "google"}
 							>
@@ -174,20 +162,6 @@ export function LoginForm({
 									<FaGoogle className="w-5 h-5" />
 								)}
 								Login with Google
-							</Button>
-							<Button
-								type="button"
-								variant="outline"
-								className="w-full border border-border hover:border-border/80 hover:bg-accent/50 text-foreground font-medium h-12 transition-all duration-200"
-								onClick={() => handleSocialLogin("facebook")}
-								disabled={socialLoading === "facebook"}
-							>
-								{socialLoading === "facebook" ? (
-									<div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-								) : (
-									<FaMeta className="w-5 h-5" />
-								)}
-								Login with Meta
 							</Button>
 							<Button
 								type="button"

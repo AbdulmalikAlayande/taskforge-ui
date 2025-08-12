@@ -15,14 +15,7 @@ import {
 	CardDescription,
 	CardContent,
 } from "@src/components/ui/card";
-import {
-	FaGoogle,
-	FaMeta,
-	FaApple,
-	FaGithub,
-	FaEye,
-	FaEyeSlash,
-} from "react-icons/fa6";
+import { FaGoogle, FaGithub, FaEye, FaEyeSlash } from "react-icons/fa6";
 import { cn, login } from "@src/lib/utils";
 import { Input } from "@src/components/ui/input";
 import { Checkbox } from "@src/components/ui/checkbox";
@@ -286,34 +279,6 @@ export function SignupForm({
 									<FaGoogle className="w-5 h-5" />
 								)}
 								Continue with Google
-							</Button>
-							<Button
-								type="button"
-								variant="outline"
-								className="w-full border border-border hover:border-border/80 hover:bg-accent/50 text-foreground font-medium h-12 transition-all duration-200"
-								onClick={() => handleSocialSignup("facebook")}
-								disabled={socialLoading === "facebook"}
-							>
-								{socialLoading === "facebook" ? (
-									<div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-								) : (
-									<FaMeta className="w-5 h-5" />
-								)}
-								Continue with Meta
-							</Button>
-							<Button
-								type="button"
-								variant="outline"
-								className="w-full border border-border hover:border-border/80 hover:bg-accent/50 text-foreground font-medium h-12 transition-all duration-200"
-								onClick={() => handleSocialSignup("apple")}
-								disabled={socialLoading === "apple"}
-							>
-								{socialLoading === "apple" ? (
-									<div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-								) : (
-									<FaApple className="w-5 h-5" />
-								)}
-								Continue with Apple
 							</Button>
 							<Button
 								type="button"
