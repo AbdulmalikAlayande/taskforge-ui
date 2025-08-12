@@ -55,8 +55,6 @@ export const CreateProjectDialog: React.FC<{ tenantId: string }> = ({
 	const [project, setProject] = useState<ProjectRequest>(defaultProjectData);
 
 	const handleOptionClick = (id: string, selectorType?: string) => {
-		console.log("Selected option:", id, "Type:", selectorType);
-		console.log("Project Before:: ", project);
 		setProject((prev) => {
 			switch (selectorType) {
 				case "status":
@@ -146,7 +144,7 @@ export const CreateProjectDialog: React.FC<{ tenantId: string }> = ({
 	}
 
 	return (
-		<div className="mt-4 w-full flex justify-start">
+		<div className="mt-4 flex justify-start">
 			<Dialog
 				open={dialogOpen}
 				onOpenChange={() => {
@@ -167,7 +165,7 @@ export const CreateProjectDialog: React.FC<{ tenantId: string }> = ({
         w-[100vh] max-w-[95vw] max-h-[90vh]
         */}
 
-				<DialogContent className="p-4 overflow-auto rounded-xl w-[700px] max-w-[95vw]">
+				<DialogContent className="p-4 overflow-auto rounded-xl min-w-[90vw] max-w-[95vw] lg:min-w-[60vw] lg:max-w-[70vw] ">
 					<DialogHeader className="flex flex-col gap-4 mb-4">
 						<DialogTitle className="w-full text-lg text-left">
 							New project

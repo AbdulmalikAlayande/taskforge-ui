@@ -16,12 +16,14 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
 
 	useEffect(() => {
 		const validateTenantAccess = async () => {
-			// if (status === "loading") return;
-			// if (!session) {
-			// 	router.push("/auth/login");
-			// 	return;
-			// }
-			// router.push("/onboarding/organization");
+			if (status === "loading") return;
+			if (!session && status == "unauthenticated") {
+				router.push("/login");
+				return;
+			}
+			if (session?.user) {
+				return;
+			}
 		};
 
 		validateTenantAccess();
