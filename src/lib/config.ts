@@ -6,8 +6,6 @@
  * switching between development and production environments.
  */
 
-import Logger from "./logger";
-
 export interface AppConfig {
 	// API Configuration
 	api: {
