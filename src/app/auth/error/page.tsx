@@ -10,8 +10,9 @@ import {
 	CardTitle,
 } from "@src/components/ui/card";
 import Link from "next/link";
+import { Suspense } from "react";
 
-export default function AuthError() {
+function AuthErrorContent() {
 	const searchParams = useSearchParams();
 	const error = searchParams.get("error");
 
@@ -56,36 +57,65 @@ export default function AuthError() {
 	};
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gray-50">
-			<Card className="w-full max-w-md">
-				<CardHeader>
-					<CardTitle className="text-red-600">Authentication Error</CardTitle>
-					<CardDescription>{error && `Error: ${error}`}</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-4">
-					<p className="text-sm text-gray-600">{getErrorMessage(error)}</p>
+		<Card className="w-full max-w-md">
+			<CardHeader>
+				<CardTitle className="text-red-600">Authentication Error</CardTitle>
+				<CardDescription>{error && `Error: ${error}`}</CardDescription>
+			</CardHeader>
+			<CardContent className="space-y-4">
+				<p className="text-sm text-gray-600">{getErrorMessage(error)}</p>
 
-					{getDebugInfo(error).length > 0 && (
-						<div className="p-3 rounded text-xs">
-							<p className="font-semibold mb-2">Debug Information:</p>
-							<ul className="space-y-1">
-								{getDebugInfo(error).map((info, index) => (
-									<li key={index}>{info}</li>
-								))}
-							</ul>
-						</div>
-					)}
-
-					<div className="flex space-x-2">
-						<Button asChild variant="outline" className="flex-1">
-							<Link href="/login">Try Again</Link>
-						</Button>
-						<Button asChild className="flex-1">
-							<Link href="/">Go Home</Link>
-						</Button>
+				{getDebugInfo(error).length > 0 && (
+					<div className="p-3 rounded text-xs">
+						<p className="font-semibold mb-2">Debug Information:</p>
+						<ul className="space-y-1">
+							{getDebugInfo(error).map((info, index) => (
+								<li key={index}>{info}</li>
+							))}
+						</ul>
 					</div>
-				</CardContent>
-			</Card>
+				)}
+
+				<div className="flex space-x-2">
+					<Button asChild variant="outline" className="flex-1">
+						<Link href="/login">Try Again</Link>
+					</Button>
+					<Button asChild className="flex-1">
+						<Link href="/">Go Home</Link>
+					</Button>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
+function LoadingFallback() {
+	return (
+		<Card className="w-full max-w-md">
+			<CardHeader>
+				<CardTitle className="text-gray-600">Loading...</CardTitle>
+				<CardDescription>Processing authentication error</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<div className="animate-pulse space-y-4">
+					<div className="h-4 bg-gray-200 rounded w-3/4"></div>
+					<div className="h-4 bg-gray-200 rounded w-1/2"></div>
+					<div className="flex space-x-2">
+						<div className="h-10 bg-gray-200 rounded flex-1"></div>
+						<div className="h-10 bg-gray-200 rounded flex-1"></div>
+					</div>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
+export default function AuthError() {
+	return (
+		<div className="min-h-screen flex items-center justify-center bg-gray-50">
+			<Suspense fallback={<LoadingFallback />}>
+				<AuthErrorContent />
+			</Suspense>
 		</div>
 	);
 }
