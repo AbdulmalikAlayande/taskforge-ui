@@ -10,7 +10,7 @@ import {
 import { MoreHorizontal, Users2 } from "lucide-react";
 import { Button } from "@src/components/ui/button";
 import React from "react";
-import { List, ListItem } from "@src/components/ui/list";
+import { UnorderedList, ListItem } from "@src/components/ui/list";
 import { Checkbox } from "@src/components/ui/checkbox";
 import { useIsMobile } from "@src/app/hooks/use-mobile";
 
@@ -86,7 +86,7 @@ export function MemberSelector({ onChange }: MemberSelectorProps) {
 				className="w-72 rounded-md border bg-popover text-popover-foreground shadow-md p-0"
 			>
 				{data ? (
-					<List selectable>
+					<UnorderedList selectable>
 						{data.map((member) => (
 							<ListItem
 								key={member.publicId}
@@ -145,7 +145,7 @@ export function MemberSelector({ onChange }: MemberSelectorProps) {
 								{`${member.firstname} ${member.lastname}`}
 							</ListItem>
 						))}
-					</List>
+					</UnorderedList>
 				) : isLoading ? (
 					<div className="p-4 text-center">Loading...</div>
 				) : (

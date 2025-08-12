@@ -2,67 +2,92 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@src/lib/utils";
 
-// List Variants
-const listVariants = cva("", {
+// Base List Variants
+const baseListVariants = cva("", {
 	variants: {
-		type: {
-			unordered: "list-disc pl-6",
-			ordered: "list-decimal pl-6",
-			description: "space-y-2",
-		},
 		orientation: {
 			vertical: "flex flex-col",
 			horizontal: "flex flex-row gap-4",
 		},
+		spacing: {
+			none: "",
+			sm: "space-y-1",
+			md: "space-y-2",
+			lg: "space-y-4",
+		},
 	},
 	defaultVariants: {
-		type: "unordered",
 		orientation: "vertical",
+		spacing: "md",
 	},
 });
 
-// List Props
-interface ListProps
-	extends React.HTMLAttributes<
-			HTMLUListElement | HTMLOListElement | HTMLDListElement
-		>,
-		VariantProps<typeof listVariants> {
-	as?: "ul" | "ol" | "dl";
+// Unordered List Variants
+const unorderedListVariants = cva("list-disc pl-6", {
+	variants: {
+		marker: {
+			disc: "list-disc",
+			circle: "list-circle",
+			square: "list-square",
+			none: "list-none",
+		},
+	},
+	defaultVariants: {
+		marker: "disc",
+	},
+});
+
+// Ordered List Variants
+const orderedListVariants = cva("list-decimal pl-6", {
+	variants: {
+		marker: {
+			decimal: "list-decimal",
+			"lower-alpha": "list-lower-alpha",
+			"upper-alpha": "list-upper-alpha",
+			"lower-roman": "list-lower-roman",
+			"upper-roman": "list-upper-roman",
+			none: "list-none",
+		},
+	},
+	defaultVariants: {
+		marker: "decimal",
+	},
+});
+
+// Description List Variants
+const descriptionListVariants = cva("space-y-2", {
+	variants: {
+		layout: {
+			stacked: "space-y-2",
+			inline: "flex flex-col gap-1",
+			grid: "grid grid-cols-3 gap-2",
+		},
+	},
+	defaultVariants: {
+		layout: "stacked",
+	},
+});
+
+// Base Props for all lists
+interface BaseListProps extends VariantProps<typeof baseListVariants> {
 	selectable?: boolean;
+	className?: string;
+	children?: React.ReactNode;
 }
 
-// List Component
-/**
- * A polymorphic List component that can render as `<ul>`, `<ol>`, or `<dl>`,
- * supporting different list types and orientations.
- *
- * @remarks
- * The `List` component uses `React.forwardRef` with a union of three element types:
- * `HTMLUListElement`, `HTMLOListElement`, and `HTMLDListElement`. This may cause type errors
- * in some cases because the ref type is not a single element type.
- *
- * @ts-expect-error The error occurs because we are joining three types of elements (ul, ol, dl) in the ref.
- *
- * @param props - The props for the List component.
- * @param props.as - The HTML tag to render as: "ul", "ol", or "dl". Defaults to "ul".
- * @param props.type - The type of list: "ordered", "unordered", or "description".
- * @param props.orientation - The orientation of the list.
- * @param props.selectable - Whether the list is selectable. Defaults to false.
- * @param props.className - Additional class names to apply.
- * @param props.children - The list items or content.
- * @param ref - The forwarded ref for the list element.
- *
- * @returns The rendered list element.
- */
-const List = React.forwardRef<
-	HTMLUListElement | HTMLOListElement | HTMLDListElement,
-	ListProps
->(
+// UnorderedList Props
+interface UnorderedListProps
+	extends React.HTMLAttributes<HTMLUListElement>,
+		BaseListProps,
+		VariantProps<typeof unorderedListVariants> {}
+
+// UnorderedList Component
+const UnorderedList = React.forwardRef<HTMLUListElement, UnorderedListProps>(
 	(
 		{
-			as = "ul",
-			type,
 			orientation,
+			spacing,
+			marker,
 			selectable = false,
 			className,
 			children,
@@ -70,27 +95,109 @@ const List = React.forwardRef<
 		},
 		ref
 	) => {
-		const Tag = as;
-		const effectiveType =
-			type ||
-			(as === "ol" ? "ordered" : as === "dl" ? "description" : "unordered");
-
 		return (
-			<Tag
+			<ul
 				ref={ref}
 				className={cn(
-					listVariants({ type: effectiveType, orientation }),
+					baseListVariants({ orientation, spacing }),
+					unorderedListVariants({ marker }),
 					className
 				)}
 				role={selectable ? "listbox" : "list"}
 				{...props}
 			>
 				{children}
-			</Tag>
+			</ul>
 		);
 	}
 );
-List.displayName = "List";
+UnorderedList.displayName = "UnorderedList";
+
+// OrderedList Props
+interface OrderedListProps
+	extends React.HTMLAttributes<HTMLOListElement>,
+		BaseListProps,
+		VariantProps<typeof orderedListVariants> {
+	start?: number;
+	reversed?: boolean;
+}
+
+// OrderedList Component
+const OrderedList = React.forwardRef<HTMLOListElement, OrderedListProps>(
+	(
+		{
+			orientation,
+			spacing,
+			marker,
+			selectable = false,
+			start,
+			reversed,
+			className,
+			children,
+			...props
+		},
+		ref
+	) => {
+		return (
+			<ol
+				ref={ref}
+				className={cn(
+					baseListVariants({ orientation, spacing }),
+					orderedListVariants({ marker }),
+					className
+				)}
+				role={selectable ? "listbox" : "list"}
+				start={start}
+				reversed={reversed}
+				{...props}
+			>
+				{children}
+			</ol>
+		);
+	}
+);
+OrderedList.displayName = "OrderedList";
+
+// DescriptionList Props
+interface DescriptionListProps
+	extends React.HTMLAttributes<HTMLDListElement>,
+		BaseListProps,
+		VariantProps<typeof descriptionListVariants> {}
+
+// DescriptionList Component
+const DescriptionList = React.forwardRef<
+	HTMLDListElement,
+	DescriptionListProps
+>(
+	(
+		{
+			orientation,
+			spacing,
+			layout,
+			selectable = false,
+			className,
+			children,
+			...props
+		},
+		ref
+	) => {
+		return (
+			<dl
+				ref={ref}
+				className={cn(
+					baseListVariants({ orientation, spacing }),
+					descriptionListVariants({ layout }),
+					className
+				)}
+				role={selectable ? "listbox" : "list"}
+				{...props}
+			>
+				{children}
+			</dl>
+		);
+	}
+);
+DescriptionList.displayName = "DescriptionList";
 
 // ListItem Props
 interface ListItemProps extends React.HTMLAttributes<HTMLLIElement> {
@@ -158,17 +265,55 @@ const DescriptionItem = ({
 );
 DescriptionItem.displayName = "DescriptionItem";
 
-// NestedList Component
-type NestedListProps = Omit<ListProps, "as"> & { as?: "ul" | "ol" };
+// Nested List Components
+interface NestedUnorderedListProps
+	extends Omit<UnorderedListProps, "className"> {
+	className?: string;
+}
 
-const NestedList = React.forwardRef<
-	HTMLUListElement | HTMLOListElement,
-	NestedListProps
->(({ className, as = "ul", ...props }, ref) => (
-	<List ref={ref} as={as} className={cn("ml-4", className)} {...props} />
+const NestedUnorderedList = React.forwardRef<
+	HTMLUListElement,
+	NestedUnorderedListProps
+>(({ className, ...props }, ref) => (
+	<UnorderedList ref={ref} className={cn("ml-4", className)} {...props} />
 ));
-NestedList.displayName = "NestedList";
+NestedUnorderedList.displayName = "NestedUnorderedList";
 
-export { List, ListItem, DescriptionItem, NestedList };
-export type { ListProps, ListItemProps, DescriptionItemProps, NestedListProps };
-export { listVariants as listVariantsClass };
+interface NestedOrderedListProps extends Omit<OrderedListProps, "className"> {
+	className?: string;
+}
+
+const NestedOrderedList = React.forwardRef<
+	HTMLOListElement,
+	NestedOrderedListProps
+>(({ className, ...props }, ref) => (
+	<OrderedList ref={ref} className={cn("ml-4", className)} {...props} />
+));
+NestedOrderedList.displayName = "NestedOrderedList";
+
+export {
+	UnorderedList,
+	OrderedList,
+	DescriptionList,
+	ListItem,
+	DescriptionItem,
+	NestedUnorderedList,
+	NestedOrderedList,
+};
+
+export type {
+	UnorderedListProps,
+	OrderedListProps,
+	DescriptionListProps,
+	ListItemProps,
+	DescriptionItemProps,
+	NestedUnorderedListProps,
+	NestedOrderedListProps,
+};
+
+export {
+	baseListVariants,
+	unorderedListVariants,
+	orderedListVariants,
+	descriptionListVariants,
+};
