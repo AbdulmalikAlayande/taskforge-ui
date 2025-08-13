@@ -31,6 +31,22 @@ const useIndexedDB = () => {
 		return db.add("organizations", orgData);
 	};
 
+	const updateOrganization = async (
+		orgData: OrganizationResponse
+	): Promise<IDBValidKey | undefined> => {
+		if (!db) return undefined;
+		return db.put("organizations", orgData);
+	};
+
+	const saveOrganization = async (
+		publicId: string,
+		orgData: OrganizationResponse
+	): Promise<IDBValidKey | undefined> => {
+		if (!db) return undefined;
+		// Use put which will add or update
+		return db.put("organizations", { ...orgData, publicId });
+	};
+
 	const getOrganization = async (
 		publicId: string
 	): Promise<OrganizationResponse | undefined> => {
@@ -48,6 +64,8 @@ const useIndexedDB = () => {
 	return {
 		db,
 		addOrganization,
+		updateOrganization,
+		saveOrganization,
 		getOrganization,
 		getAllOrganizations,
 	};

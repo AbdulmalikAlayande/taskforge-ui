@@ -1,15 +1,10 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React from "react";
 import { SidebarInset, SidebarProvider } from "@src/components/ui/sidebar";
 import { AppSidebar } from "../components/sidebar/app-sidebar";
 import { AppNavbar } from "../components/navbar/app-navbar";
-import { useTenant } from "@src/components/tenant-provider";
-import { useSearchParams } from "next/navigation";
-import Logger from "@src/lib/logger";
-import { useFetch } from "@src/app/hooks/useFetch";
-import { OrganizationResponse } from "@src/lib/response-types";
-import useIndexedDB from "@src/lib/useIndexedDB";
+import { useOrganization } from "@src/components/tenant-provider";
 import { Boxes, ListFilter, SlidersHorizontal } from "lucide-react";
 import { Button } from "@src/components/ui/button";
 import { TypographyP } from "@src/components/ui/typography";
@@ -22,72 +17,16 @@ import { CreateProjectDialog } from "./components/create-project-popover";
 import { DescriptionItem, DescriptionList } from "@src/components/ui/list";
 import { Label } from "@src/components/ui/label";
 
-const defaultOrganizationData = {
-	publicId: "",
-	name: "string",
-	email: "",
-	slug: "",
-	description: "",
-	industry: "",
-	country: "",
-	phone: "",
-	timeZone: "",
-	websiteUrl: "",
-	logoUrl: "",
-	projects: [],
-};
-
 const Project = () => {
-	const { isLoading, tenantId } = useTenant();
-	const searchParams = useSearchParams();
-	const userId = searchParams.get("uid");
-	const { getOrganization } = useIndexedDB();
-
-	const [organization, setOrganization] = useState<OrganizationResponse>(
-		defaultOrganizationData
-	);
-
-	const fetchConfig = useMemo(
-		() => ({
-			enabled: !!tenantId,
-			url: `/organization/${tenantId}`,
-			queryKey: [`organization-${tenantId}`],
-			retry: 3,
-			refetchOnWindowFocus: false,
-			staleTime: 5 * 60 * 1000,
-		}),
-		[tenantId]
-	);
-
-	const { data } = useFetch<OrganizationResponse>(fetchConfig);
-
-	const loadOrganization = useCallback(async () => {
-		if (!tenantId) return;
-		try {
-			const org = await getOrganization(tenantId);
-			if (org) {
-				setOrganization(org);
-				return;
-			}
-
-			if (data) {
-				Logger.debug("Loading organization from API:", data);
-				setOrganization(data);
-			}
-		} catch (error) {
-			Logger.error("Failed to load organization data", {
-				error: String(error),
-			});
-		}
-	}, [data, getOrganization, tenantId]);
-
-	useEffect(() => {
-		if (!tenantId) {
-			return;
-		}
-
-		loadOrganization();
-	}, [loadOrganization, tenantId, userId]);
+	const {
+		organization,
+		isLoading,
+		error,
+		tenantId,
+		hasOrganization,
+		refreshOrganization,
+		projects,
+	} = useOrganization();
 
 	if (isLoading) {
 		return (
@@ -95,6 +34,38 @@ const Project = () => {
 				<div className="text-center">
 					<div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
 					<p className="text-muted-foreground">Loading projects...</p>
+				</div>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="min-h-screen flex items-center justify-center">
+				<div className="text-center">
+					<h2 className="text-lg font-semibold text-destructive mb-2">
+						Failed to load organization
+					</h2>
+					<p className="text-muted-foreground mb-4">{error}</p>
+					<button
+						onClick={refreshOrganization}
+						className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+					>
+						Try Again
+					</button>
+				</div>
+			</div>
+		);
+	}
+
+	if (!hasOrganization) {
+		return (
+			<div className="min-h-screen flex items-center justify-center">
+				<div className="text-center">
+					<h2 className="text-lg font-semibold mb-2">Organization not found</h2>
+					<p className="text-muted-foreground">
+						The requested organization could not be found.
+					</p>
 				</div>
 			</div>
 		);
@@ -111,7 +82,7 @@ const Project = () => {
 		>
 			<AppSidebar
 				sidebarProps={{ variant: "inset" }}
-				organization={organization}
+				organization={organization!}
 			/>
 			<SidebarInset>
 				<AppNavbar section={"Projects"} />
@@ -156,26 +127,36 @@ const Project = () => {
 
 						<CreateProjectDialog tenantId={tenantId} />
 					</div>
-					<DescriptionList>
-						<DescriptionItem term="Name" description={organization.name} />
-						<DescriptionItem
-							term="Industry"
-							description={organization.industry}
-						/>
-						<DescriptionItem
-							term="Country"
-							description={organization.country}
-						/>
-						<DescriptionItem term="Phone" description={organization.phone} />
-						<DescriptionItem
-							term="Time Zone"
-							description={organization.timeZone}
-						/>
-						<DescriptionItem
-							term="Website"
-							description={organization.websiteUrl}
-						/>
-					</DescriptionList>
+
+					{organization && (
+						<DescriptionList>
+							<DescriptionItem term="Name" description={organization.name} />
+							<DescriptionItem
+								term="Industry"
+								description={organization.industry || "Not specified"}
+							/>
+							<DescriptionItem
+								term="Country"
+								description={organization.country || "Not specified"}
+							/>
+							<DescriptionItem
+								term="Phone"
+								description={organization.phone || "Not specified"}
+							/>
+							<DescriptionItem
+								term="Time Zone"
+								description={organization.timeZone || "Not specified"}
+							/>
+							<DescriptionItem
+								term="Website"
+								description={organization.websiteUrl || "Not specified"}
+							/>
+							<DescriptionItem
+								term="Projects Count"
+								description={projects.length.toString()}
+							/>
+						</DescriptionList>
+					)}
 				</div>
 			</SidebarInset>
 		</SidebarProvider>
