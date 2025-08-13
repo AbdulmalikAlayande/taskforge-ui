@@ -51,10 +51,7 @@ type AppSidebarProps = {
 	sidebarProps: React.ComponentProps<typeof Sidebar>;
 };
 
-export const AppSidebar = ({
-	organization,
-	...sidebarprops
-}: AppSidebarProps) => {
+export const AppSidebar = ({ organization, ...props }: AppSidebarProps) => {
 	const { getUserData } = useUserStorage();
 	const [taskItems, setTaskItems] = useState<
 		Array<{ title: string; url: string }>
@@ -209,7 +206,7 @@ export const AppSidebar = ({
 	);
 
 	return (
-		<Sidebar collapsible="icon" {...sidebarprops}>
+		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
 				<TeamSwitcher teams={defaultTeams} />
 			</SidebarHeader>
