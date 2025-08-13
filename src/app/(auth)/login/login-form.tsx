@@ -59,7 +59,9 @@ export function LoginForm({
 		setIsLoading(true);
 		let loadingToast: string | number | null = null;
 		try {
-			loadingToast = toast.loading("Creating your account...");
+			loadingToast = toast.loading("Logging in...", {
+				position: "top-right",
+			});
 
 			(async () => {
 				try {
@@ -67,7 +69,9 @@ export function LoginForm({
 					const response = await login(data, update);
 					Logger.success("Login was successful", response);
 				} catch (loginError) {
-					toast.error("Login failed.");
+					toast.error("Login failed.", {
+						position: "top-right",
+					});
 					console.error("Login error:", loginError);
 					Logger.error("Login failed:", {
 						error:

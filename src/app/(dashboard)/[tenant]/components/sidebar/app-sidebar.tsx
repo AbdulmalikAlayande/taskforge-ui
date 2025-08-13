@@ -53,7 +53,7 @@ type AppSidebarProps = {
 
 export const AppSidebar = ({
 	organization,
-	...sidebarProps
+	...sidebarprops
 }: AppSidebarProps) => {
 	const { getUserData } = useUserStorage();
 	const [taskItems, setTaskItems] = useState<
@@ -209,7 +209,7 @@ export const AppSidebar = ({
 	);
 
 	return (
-		<Sidebar collapsible="icon" {...sidebarProps}>
+		<Sidebar collapsible="icon" {...sidebarprops}>
 			<SidebarHeader>
 				<TeamSwitcher teams={defaultTeams} />
 			</SidebarHeader>
