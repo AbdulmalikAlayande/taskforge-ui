@@ -10,7 +10,7 @@ import { useUserStorage } from "@src/app/hooks/useUserStorage";
 export default function AuthSuccessPage() {
 	const { data: session, status } = useSession();
 	const router = useRouter();
-	const { getUserData } = useUserStorage();
+	const { getUserData, getCurrentTenantId } = useUserStorage();
 
 	useEffect(() => {
 		if (status === "loading") return;
@@ -155,9 +155,16 @@ export default function AuthSuccessPage() {
 						description: "Welcome back to TaskForge!",
 					});
 
-					const tenantId =
-						localStorage.getItem("current_tenant_id") ||
-						sessionStorage.getItem("current_tenant_id");
+					const tenantId = getCurrentTenantId();
+					if (!tenantId) {
+						Logger.error("No tenant ID found after login", {
+							storedTenantId: tenantId,
+							userId: userId,
+						});
+						router.push("/login");
+						return;
+					}
+
 					router.push(`/${tenantId}/projects?uid=${userId}`);
 				} else {
 					Logger.warning("Unknown auth intent", { authIntent });
@@ -173,7 +180,7 @@ export default function AuthSuccessPage() {
 		};
 
 		checkAuthenticationState();
-	}, [session, status, router, getUserData]);
+	}, [session, status, router, getUserData, getCurrentTenantId]);
 
 	if (status === "loading") {
 		return (

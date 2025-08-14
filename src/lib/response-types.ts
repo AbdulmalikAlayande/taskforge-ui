@@ -12,6 +12,8 @@ export interface LoginResponse {
 	roles: string[];
 	tokenType: "Bearer";
 	expiresIn: string;
+	tenantId?: string;
+	organizationId?: string;
 }
 
 export interface UserResponse {

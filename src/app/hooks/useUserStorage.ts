@@ -61,6 +61,24 @@ export function useUserStorage() {
 		return sessionStorage.getItem("auth_provider");
 	};
 
+	// Tenant/Organization management functions
+	const getCurrentTenantId = useCallback((): string | null => {
+		return (
+			localStorage.getItem("current_tenant_id") ||
+			sessionStorage.getItem("current_tenant_id")
+		);
+	}, []);
+
+	const setCurrentTenantId = useCallback((tenantId: string) => {
+		localStorage.setItem("current_tenant_id", tenantId);
+		sessionStorage.setItem("current_tenant_id", tenantId);
+	}, []);
+
+	const clearTenantData = useCallback(() => {
+		localStorage.removeItem("current_tenant_id");
+		sessionStorage.removeItem("current_tenant_id");
+	}, []);
+
 	return {
 		storeUserData,
 		getUserData,
@@ -68,5 +86,8 @@ export function useUserStorage() {
 		isSignupCompleted,
 		getAuthIntent,
 		getAuthProvider,
+		getCurrentTenantId,
+		setCurrentTenantId,
+		clearTenantData,
 	};
 }

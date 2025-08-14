@@ -133,6 +133,16 @@ const manuallyUpdateAuthSession = (loginResponse: LoginResponse) => {
 			Logger.debug("User ID stored in session storage");
 		}
 
+		// Store tenant/organization ID from backend response
+		const tenantId = loginResponse.tenantId || loginResponse.organizationId;
+		if (tenantId) {
+			sessionStorage.setItem("current_tenant_id", tenantId);
+			localStorage.setItem("current_tenant_id", tenantId);
+			Logger.debug("Tenant ID stored in storage", { tenantId });
+		} else {
+			Logger.warning("No tenant ID received from backend", { loginResponse });
+		}
+
 		return true;
 	} catch (error) {
 		Logger.error("Error manually updating auth session:", { error });

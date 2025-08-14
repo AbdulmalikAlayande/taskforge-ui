@@ -14,7 +14,7 @@ interface TenantLayoutProps {
 export default function TenantLayout({ children }: TenantLayoutProps) {
 	const router = useRouter();
 	const { data: session, status } = useSession();
-	const { getUserData } = useUserStorage();
+	const { getUserData, getCurrentTenantId } = useUserStorage();
 	const params = useParams<{ tenant: string }>();
 
 	useEffect(() => {
@@ -34,6 +34,7 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
 				sessionStorage.getItem("user_public_id") ||
 				localStorage.getItem("user_public_id");
 
+			const currentTenantId = getCurrentTenantId();
 			const userData = getUserData();
 			const isCustomLoginAuthenticated =
 				hasAccessToken && hasRefreshToken && storedUserId;
@@ -41,6 +42,7 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
 
 			Logger.info("Tenant layout - Authentication check", {
 				tenant: params.tenant,
+				currentTenantId,
 				nextAuthStatus: status,
 				nextAuthSession: !!session?.user,
 				customLoginTokens: {
@@ -63,15 +65,27 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
 				return;
 			}
 
+			// Validate tenant access - check if URL tenant matches stored tenant
+			if (currentTenantId && params.tenant !== currentTenantId) {
+				Logger.warning("Tenant mismatch detected", {
+					urlTenant: params.tenant,
+					storedTenant: currentTenantId,
+				});
+				// Redirect to the correct tenant
+				router.push(`/${currentTenantId}/projects?uid=${storedUserId}`);
+				return;
+			}
+
 			// User is authenticated - proceed with tenant access
 			Logger.info("User authenticated, allowing tenant access", {
 				authMethod: isCustomLoginAuthenticated ? "custom" : "oauth",
 				tenant: params.tenant,
+				tenantMatch: currentTenantId === params.tenant,
 			});
 		};
 
 		validateTenantAccess();
-	}, [session, status, params.tenant, router, getUserData]);
+	}, [session, status, params.tenant, router, getUserData, getCurrentTenantId]);
 
 	if (status === "loading") {
 		return (
