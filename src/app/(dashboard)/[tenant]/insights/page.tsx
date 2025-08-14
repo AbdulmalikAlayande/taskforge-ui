@@ -68,10 +68,7 @@ const Insights = () => {
 				} as React.CSSProperties
 			}
 		>
-			<AppSidebar
-				sidebarProps={{ variant: "inset" }}
-				organization={organization!}
-			/>
+			<AppSidebar props={{ variant: "inset" }} organization={organization!} />
 			<SidebarInset>
 				<AppNavbar section={"Insights"} />
 				<div className="p-6">

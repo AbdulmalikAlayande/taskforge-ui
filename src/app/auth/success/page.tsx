@@ -12,18 +12,123 @@ export default function AuthSuccessPage() {
 	const router = useRouter();
 	const { getUserData } = useUserStorage();
 
-	const userData = getUserData();
-
 	useEffect(() => {
 		if (status === "loading") return;
 
-		if (!session?.user && !userData) {
-			Logger.warning("No authenticated user found, redirecting to login");
-			router.push("/login");
-			return;
-		}
+		const userData = getUserData();
 
-		const handlePostAuth = async () => {
+		const checkAuthenticationState = async () => {
+			const isChromium = /Chrome|Chromium|Edg|Brave/.test(navigator.userAgent);
+			const isFirefox = /Firefox/.test(navigator.userAgent);
+
+			// Check for custom login tokens (from your login form)
+			const hasAccessToken =
+				sessionStorage.getItem("next-auth.access-token") ||
+				localStorage.getItem("next-auth.access-token");
+			const hasRefreshToken =
+				sessionStorage.getItem("next-auth.refresh-token") ||
+				localStorage.getItem("next-auth.refresh-token");
+			const storedUserId =
+				sessionStorage.getItem("user_id") ||
+				localStorage.getItem("user_id") ||
+				sessionStorage.getItem("user_public_id") ||
+				localStorage.getItem("user_public_id") ||
+				(userData && typeof userData === "object" && "publicId" in userData
+					? (userData as { publicId: string }).publicId
+					: null);
+
+			Logger.info("Auth success page - Authentication state check", {
+				userAgent: navigator.userAgent,
+				browser: isChromium
+					? "Chromium-based"
+					: isFirefox
+						? "Firefox"
+						: "Other",
+				nextAuthStatus: status,
+				nextAuthSession: !!session?.user,
+				customLoginTokens: {
+					hasAccessToken: !!hasAccessToken,
+					hasRefreshToken: !!hasRefreshToken,
+					hasUserId: !!storedUserId,
+				},
+				userData,
+			});
+
+			// For custom login (form-based), tokens are already stored
+			if (hasAccessToken && storedUserId) {
+				Logger.info("Custom login detected - proceeding with stored tokens", {
+					userId: storedUserId,
+					hasTokens: true,
+				});
+
+				// Proceed with custom login flow
+				await handleAuthenticationSuccess(storedUserId, userData, "custom");
+				return;
+			}
+
+			// For OAuth logins, wait for NextAuth session
+			if (isChromium) {
+				let attempts = 0;
+				const maxAttempts = 15;
+				const pollInterval = 1000;
+
+				const pollForSession = async (): Promise<boolean> => {
+					attempts++;
+					Logger.info(`OAuth session poll attempt ${attempts}/${maxAttempts}`, {
+						hasSession: !!session?.user,
+						sessionStatus: status,
+						sessionData: session,
+					});
+
+					if (session?.user) {
+						Logger.info("OAuth session found via polling!", { session });
+						return true;
+					}
+
+					if (attempts >= maxAttempts) {
+						Logger.error("OAuth session polling timeout reached", {
+							attempts,
+							finalStatus: status,
+							finalSession: session,
+						});
+						return false;
+					}
+
+					await new Promise((resolve) => setTimeout(resolve, pollInterval));
+					return pollForSession();
+				};
+
+				const hasValidSession = await pollForSession();
+				if (!hasValidSession) {
+					Logger.warning("No OAuth session found after polling", {
+						session,
+						attempts,
+					});
+					router.push("/login");
+					return;
+				}
+
+				await handleAuthenticationSuccess(session!.user.id, userData, "oauth");
+			} else {
+				// Firefox - simple wait for OAuth
+				await new Promise((resolve) => setTimeout(resolve, 2000));
+				if (!session?.user) {
+					Logger.warning("No OAuth session found after waiting (Firefox)", {
+						session,
+					});
+					router.push("/login");
+					return;
+				}
+
+				await handleAuthenticationSuccess(session!.user.id, userData, "oauth");
+			}
+		};
+
+		const handleAuthenticationSuccess = async (
+			userId: string,
+			userData: unknown,
+			authType: "custom" | "oauth"
+		) => {
 			try {
 				const authIntent = sessionStorage.getItem("auth_intent");
 				const authProvider = sessionStorage.getItem("auth_provider");
@@ -31,20 +136,11 @@ export default function AuthSuccessPage() {
 				sessionStorage.removeItem("auth_intent");
 				sessionStorage.removeItem("auth_provider");
 
-				/** If the auth intent is a sign up, I want to route them to organization creation page
-				 * If the signup is an oauth signup, their Id(userId) will be gotten from the session object
-				 * If the sign up is a normal sign up, their Id will be gotten from the user context with useUserStorage hook
-				 */
-
-				/**
-				 * If the auth intent is a login, I want to route them to their dashboard page, maybe home or projects page
-				 * If the signup is an oauth signup, their Id(userId) will be gotten from the session object
-				 * If the sign up is a normal sign up, their Id will be gotten from the user context with useUserStorage hook
-				 */
-				Logger.info("OAuth success", {
+				Logger.info("Authentication success handling", {
+					authType,
 					intent: authIntent,
 					provider: authProvider,
-					userId: session?.user?.id || userData?.publicId,
+					userId: userId,
 				});
 
 				if (authIntent === "signup") {
@@ -53,18 +149,11 @@ export default function AuthSuccessPage() {
 							"Welcome to TaskForge! Let's set up your organization.",
 					});
 
-					const userId = session?.user?.id || userData?.publicId;
 					router.push(`/onboarding/organization?uid=${userId}`);
 				} else if (authIntent === "login" || !authIntent) {
 					toast.success("Login successful!", {
 						description: "Welcome back to TaskForge!",
 					});
-
-					const userId =
-						session?.user?.id ||
-						userData?.publicId ||
-						localStorage.getItem("user_id") ||
-						sessionStorage.getItem("user_id");
 
 					const tenantId =
 						localStorage.getItem("current_tenant_id") ||
@@ -83,8 +172,8 @@ export default function AuthSuccessPage() {
 			}
 		};
 
-		handlePostAuth();
-	}, [session, status, router, userData]);
+		checkAuthenticationState();
+	}, [session, status, router, getUserData]);
 
 	if (status === "loading") {
 		return (

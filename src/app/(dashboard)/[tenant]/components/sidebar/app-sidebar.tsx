@@ -48,7 +48,7 @@ interface UserData {
 
 type AppSidebarProps = {
 	organization: OrganizationResponse;
-	sidebarProps: React.ComponentProps<typeof Sidebar>;
+	props: React.ComponentProps<typeof Sidebar>;
 };
 
 export const AppSidebar = ({ organization, ...props }: AppSidebarProps) => {

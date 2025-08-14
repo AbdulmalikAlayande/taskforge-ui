@@ -68,10 +68,7 @@ const Inbox = () => {
 				} as React.CSSProperties
 			}
 		>
-			<AppSidebar
-				sidebarProps={{ variant: "inset" }}
-				organization={organization!}
-			/>
+			<AppSidebar props={{ variant: "inset" }} organization={organization!} />
 			<SidebarInset>
 				<AppNavbar section={"Inbox"} />
 				<div className="p-6">

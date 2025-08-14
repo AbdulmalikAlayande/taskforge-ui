@@ -59,6 +59,19 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 		}),
 	],
 
+	// Chrome-specific cookie configuration
+	cookies: {
+		sessionToken: {
+			name: "next-auth.session-token",
+			options: {
+				httpOnly: true,
+				sameSite: "lax",
+				path: "/",
+				secure: process.env.NODE_ENV === "production",
+			},
+		},
+	},
+
 	callbacks: {
 		async signIn({ user, account }) {
 			try {

@@ -128,6 +128,11 @@ const manuallyUpdateAuthSession = (loginResponse: LoginResponse) => {
 			Logger.debug("Refresh token stored in session storage");
 		}
 
+		if (loginResponse.userId) {
+			sessionStorage.setItem("user_id", loginResponse.userId);
+			Logger.debug("User ID stored in session storage");
+		}
+
 		return true;
 	} catch (error) {
 		Logger.error("Error manually updating auth session:", { error });
