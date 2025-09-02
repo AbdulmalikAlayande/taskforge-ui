@@ -1,21 +1,94 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { SidebarInset, SidebarProvider } from "@src/components/ui/sidebar";
 import { AppSidebar } from "../components/sidebar/app-sidebar";
 import { AppNavbar } from "../components/navbar/app-navbar";
 import { useOrganization } from "@src/components/tenant-provider";
-import { Boxes, ListFilter, SlidersHorizontal } from "lucide-react";
+import {
+	ArrowUpDown,
+	ListFilter,
+	PlusIcon,
+	SlidersHorizontal,
+} from "lucide-react";
 import { Button } from "@src/components/ui/button";
-import { TypographyP } from "@src/components/ui/typography";
 import {
 	Popover,
 	PopoverTrigger,
 	PopoverContent,
 } from "@src/components/ui/popover";
-import { CreateProjectDialog } from "./components/create-project-popover";
-import { DescriptionItem, DescriptionList } from "@src/components/ui/list";
+import { NoAvailableProjectView } from "./components/no-available-project-view";
 import { Label } from "@src/components/ui/label";
+import DataTable from "@src/components/ui/data-table";
+import { ProjectResponse } from "@src/lib/response-types";
+import { ColumnDef } from "@tanstack/react-table";
+import CreateProjectPopover from "./components/create-project-popover";
+import { Checkbox } from "@src/components/ui/checkbox";
+import {
+	Command,
+	CommandEmpty,
+	CommandList,
+	CommandSeparator,
+} from "@src/components/ui/command";
+import { Kbd } from "@src/components/ui/kbd";
+import { format, parseISO } from "date-fns";
+
+const projectColumns: ColumnDef<ProjectResponse>[] = [
+	{
+		id: "select",
+		header: ({ table }) => (
+			<Checkbox
+				checked={
+					table.getIsAllPageRowsSelected() ||
+					(table.getIsSomePageRowsSelected() && "indeterminate")
+				}
+				onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+				aria-label="Select all projects"
+			/>
+		),
+		cell: ({ row }) => (
+			<Checkbox
+				checked={row.getIsSelected()}
+				onCheckedChange={(value) => row.toggleSelected(!!value)}
+				aria-label={`Select project ${row.getValue("name")}`}
+			/>
+		),
+		enableSorting: false,
+		enableHiding: false,
+	},
+	{
+		accessorKey: "name",
+		header: ({ column }) => {
+			return (
+				<Button
+					variant="ghost"
+					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+				>
+					Name
+					<ArrowUpDown className="ml-2 h-4 w-4" />
+				</Button>
+			);
+		},
+	},
+	{
+		accessorKey: "endDate",
+		header: "End Date",
+		cell: ({ row }) => {
+			const dateValue = row.getValue("endDate");
+			if (!dateValue || typeof dateValue !== "string") return "-";
+			// Use date-fns for formatting
+			try {
+				const parsedDate = parseISO(dateValue);
+				return format(parsedDate, "MMM d, yyyy");
+			} catch {
+				return "-";
+			}
+		},
+	},
+	{ accessorKey: "status", header: "Status" },
+	{ accessorKey: "priority", header: "Priority" },
+	{ accessorKey: "category", header: "Category" },
+];
 
 const Project = () => {
 	const {
@@ -27,6 +100,11 @@ const Project = () => {
 		refreshOrganization,
 		projects,
 	} = useOrganization();
+	const [createProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
+
+	useEffect(() => {
+		console.log("Projects", projects);
+	}, [projects]);
 
 	if (isLoading) {
 		return (
@@ -83,77 +161,84 @@ const Project = () => {
 			<AppSidebar props={{ variant: "inset" }} organization={organization!} />
 			<SidebarInset>
 				<AppNavbar section={"Projects"} />
-				<div className="w-full border-b flex justify-between items-center p-2">
+				<div className="text-sm w-full border-b flex justify-between items-center px-2 py-1">
 					<Popover>
 						<PopoverTrigger asChild>
 							<Button variant={"ghost"}>
 								<ListFilter />
-								<Label>Filter</Label>
+								<Label className="text-sm">Filter</Label>
 							</Button>
 						</PopoverTrigger>
-						<PopoverContent className="w-80 h-screen p-4"></PopoverContent>
+						<PopoverContent
+							align="start"
+							sideOffset={8}
+							className="text-sm w-80 h-screen p-2 rounded-md border bg-popover text-popover-foreground shadow-md"
+						>
+							<Command className="text-sm">
+								<div className="h-6 flex items-baseline justify-between mb-2">
+									<span className="h-full text-xs text-muted-foreground flex items-center gap-1">
+										<Kbd className="border-border">⌘</Kbd>
+										<span> then </span>
+										<Kbd className="border-border">F</Kbd>
+									</span>
+								</div>
+								<CommandSeparator />
+								<CommandList>
+									<CommandEmpty>No filters applied</CommandEmpty>
+								</CommandList>
+							</Command>
+						</PopoverContent>
 					</Popover>
-					<Popover>
-						<PopoverTrigger asChild>
-							<Button className="border-2" size={"sm"} variant={"secondary"}>
-								<SlidersHorizontal />
-								<Label>Display</Label>
-							</Button>
-						</PopoverTrigger>
-						<PopoverContent className="w-80 h-80 p-4"></PopoverContent>
-					</Popover>
+					<div className="flex space-x-2 text-sm">
+						<CreateProjectPopover
+							tenantId={tenantId}
+							dialogOpen={createProjectDialogOpen}
+							setDialogOpen={setCreateProjectDialogOpen}
+							controller={
+								<Button
+									className="h-7 text-sm text-accent-foreground"
+									variant={"ghost"}
+									size={"sm"}
+								>
+									<PlusIcon />
+									<Label className="text-sm">Add Project</Label>
+								</Button>
+							}
+						/>
+
+						<Popover>
+							<PopoverTrigger asChild>
+								<Button
+									className="h-7 text-sm border text-accent-foreground bg-blend-color"
+									size={"sm"}
+									variant={"secondary"}
+								>
+									<SlidersHorizontal />
+									<Label className="text-sm">Display</Label>
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent className="text-sm w-80 h-80 p-4"></PopoverContent>
+						</Popover>
+					</div>
 				</div>
 				<div className="h-full w-full flex flex-col items-center px-6 py-2">
-					<div className="h-full w-full md:w-2/3 lg:1/2 flex flex-col justify-center text-muted-foreground text-sm">
-						<Boxes size={32} color="currentColor" />
-						<TypographyP>
-							A Project is a high-level container for a larger body of work that
-							drives toward a specific objective or outcome, such as a new
-							feature you want to ship.
-						</TypographyP>
-						<TypographyP className="hidden md:block">
-							They are often goal-oriented (e.g. <b>Launch v2.0</b>,
-							<b>Revamp onboarding</b>) and consist of multiple tasks or issues
-							that need to be completed.
-						</TypographyP>
-						<TypographyP className="hidden lg:block">
-							They can be shared across multiple teams and are comprised of
-							issues and optional documents. Projects are typically time-bound
-							and may span across multiple teams or departments.
-						</TypographyP>
-
-						<CreateProjectDialog tenantId={tenantId} />
-					</div>
-
-					{organization && (
-						<DescriptionList>
-							<DescriptionItem term="Name" description={organization.name} />
-							<DescriptionItem
-								term="Industry"
-								description={organization.industry || "Not specified"}
-							/>
-							<DescriptionItem
-								term="Country"
-								description={organization.country || "Not specified"}
-							/>
-							<DescriptionItem
-								term="Phone"
-								description={organization.phone || "Not specified"}
-							/>
-							<DescriptionItem
-								term="Time Zone"
-								description={organization.timeZone || "Not specified"}
-							/>
-							<DescriptionItem
-								term="Website"
-								description={organization.websiteUrl || "Not specified"}
-							/>
-							<DescriptionItem
-								term="Projects Count"
-								description={projects.length.toString()}
-							/>
-						</DescriptionList>
+					{projects ? (
+						<div className="w-full">
+							<DataTable columns={projectColumns} data={projects} />
+						</div>
+					) : (
+						<NoAvailableProjectView
+							tenantId={tenantId}
+							dialogOpen={createProjectDialogOpen}
+							setDialogOpen={setCreateProjectDialogOpen}
+						/>
 					)}
+
+					{/* <CreateProjectPopover
+						tenantId={tenantId}
+						dialogOpen={createProjectDialogOpen}
+						setDialogOpen={setCreateProjectDialogOpen}
+					/> */}
 				</div>
 			</SidebarInset>
 		</SidebarProvider>

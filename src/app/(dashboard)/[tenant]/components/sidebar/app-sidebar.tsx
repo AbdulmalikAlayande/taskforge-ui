@@ -27,6 +27,7 @@ import { apiClient, ApiError } from "@src/lib/apiClient";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { useFetch } from "@src/app/hooks/useFetch";
+import { useOrganization } from "@src/components/tenant-provider";
 
 interface WorkspaceItem {
 	title: string;
@@ -53,6 +54,7 @@ type AppSidebarProps = {
 
 export const AppSidebar = ({ organization, ...props }: AppSidebarProps) => {
 	const { getUserData } = useUserStorage();
+	const { tenantId } = useOrganization();
 	const [taskItems, setTaskItems] = useState<
 		Array<{ title: string; url: string }>
 	>([]);
@@ -92,15 +94,13 @@ export const AppSidebar = ({ organization, ...props }: AppSidebarProps) => {
 		}
 	}, [tasksData]);
 
-	// Build project items from organization
 	const buildProjectItemFromOrganization = useCallback(() => {
 		return organization.projects.map((project) => ({
 			title: project.name,
-			url: `/projects/${project.id}`,
+			url: `${tenantId}/projects/${project.publicId}`,
 		}));
-	}, [organization.projects]);
+	}, [organization, tenantId]);
 
-	// Build task items for a specific project
 	const buildTaskItems = useCallback(async (projectId: string) => {
 		if (!projectId) return [];
 

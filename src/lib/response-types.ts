@@ -91,6 +91,7 @@ export interface OrganizationResponse {
 
 export interface ProjectResponse {
 	id: string;
+	publicId: string;
 	name: string;
 	summary: string;
 	description: string;

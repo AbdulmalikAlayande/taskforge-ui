@@ -1,3 +1,4 @@
+import React, { JSX, ReactNode } from "react";
 import { Box, Calendar } from "lucide-react";
 import {
 	Dialog,
@@ -45,10 +46,12 @@ const defaultProjectData: ProjectRequest = {
 	category: ProjectCategory.BUILDING,
 };
 
-export const CreateProjectDialog: React.FC<{ tenantId: string }> = ({
-	tenantId,
-}) => {
-	const [dialogOpen, setDialogOpen] = useState(false);
+const CreateProjectPopover: React.FC<{
+	tenantId: string;
+	dialogOpen: boolean;
+	setDialogOpen: (dialogOpen: boolean) => void;
+	controller: ReactNode | JSX.Element;
+}> = ({ tenantId, dialogOpen, setDialogOpen, controller }) => {
 	const [startDate, setStartDate] = useState<Date>();
 	const [endDate, setEndDate] = useState<Date>();
 	const { apiClient } = useApiClient();
@@ -144,26 +147,22 @@ export const CreateProjectDialog: React.FC<{ tenantId: string }> = ({
 	}
 
 	return (
-		<div className="mt-4 flex justify-start">
+		<div className="flex justify-start">
 			<Dialog
 				open={dialogOpen}
 				onOpenChange={() => {
 					setDialogOpen(!dialogOpen);
-					setStartDate(undefined);
-					setEndDate(undefined);
+					// setStartDate(undefined);
+					// setEndDate(undefined);
 				}}
 			>
-				<DialogTrigger asChild>
-					<Button variant={"default"} size={"sm"}>
-						Create new project
-					</Button>
-				</DialogTrigger>
+				<DialogTrigger asChild>{controller}</DialogTrigger>
 				{/* 
-        w-full sm:max-w-md md:max-w-lg lg:max-w-xl max-h-[90vh]
-        max-w-[95vw] sm:w-[500px] max-h-[90vh]
-        sm:max-w-120 md:max-w-170 lg:max-w-220 sm:max-h-150 w-400 h-140
-        w-[100vh] max-w-[95vw] max-h-[90vh]
-        */}
+		w-full sm:max-w-md md:max-w-lg lg:max-w-xl max-h-[90vh]
+		max-w-[95vw] sm:w-[500px] max-h-[90vh]
+		sm:max-w-120 md:max-w-170 lg:max-w-220 sm:max-h-150 w-400 h-140
+		w-[100vh] max-w-[95vw] max-h-[90vh]
+		*/}
 
 				<DialogContent className="p-4 overflow-auto rounded-xl min-w-[90vw] max-w-[95vw] lg:min-w-[60vw] lg:max-w-[70vw] ">
 					<DialogHeader className="flex flex-col gap-4 mb-4">
@@ -271,12 +270,12 @@ export const CreateProjectDialog: React.FC<{ tenantId: string }> = ({
 						</div>
 
 						{/* Milestones section
-                    <div className="flex justify-between items-center mt-6 py-2 border-t">
-                        <h3 className="text-sm font-medium">Milestones</h3>
-                        <Button variant="ghost" size="sm">
-                            <span className="text-xl">+</span>
-                        </Button>
-                    </div> */}
+					<div className="flex justify-between items-center mt-6 py-2 border-t">
+						<h3 className="text-sm font-medium">Milestones</h3>
+						<Button variant="ghost" size="sm">
+							<span className="text-xl">+</span>
+						</Button>
+					</div> */}
 					</div>
 					{/* Dialog footer */}
 					<DialogFooter className="flex-shrink-0 pt-4 border-t">
@@ -291,3 +290,5 @@ export const CreateProjectDialog: React.FC<{ tenantId: string }> = ({
 		</div>
 	);
 };
+
+export default CreateProjectPopover;

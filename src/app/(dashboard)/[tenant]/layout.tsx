@@ -21,7 +21,6 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
 		const validateTenantAccess = async () => {
 			if (status === "loading") return;
 
-			// Check for custom login tokens (from your login form)
 			const hasAccessToken =
 				sessionStorage.getItem("next-auth.access-token") ||
 				localStorage.getItem("next-auth.access-token");
