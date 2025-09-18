@@ -27,21 +27,24 @@ interface DataTableProps<TData, TValue> {
 	data: TData[];
 }
 
-interface DataTableOptionalProps {
+interface DataTableOptionalProps<TData> {
 	showFilter?: boolean;
 	rowSize?: number;
 	tableRowClassName?: string;
 	tableHeaderClassName?: string;
+	onRowClick?: (project: TData) => void;
 }
 
 type TDataTableProps<TData, TValue> = DataTableProps<TData, TValue> &
-	DataTableOptionalProps;
+	DataTableOptionalProps<TData>;
 
 export default function DataTable<TData, TValue>({
 	columns,
 	data,
+	onRowClick,
 }: TDataTableProps<TData, TValue>) {
 	const [sorting, setSorting] = React.useState<SortingState>([]);
+	const PAGE_SIZE = 10;
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
 		[]
 	);
@@ -102,6 +105,9 @@ export default function DataTable<TData, TValue>({
 									key={row.id}
 									data-state={row.getIsSelected() && "selected"}
 									className="border-none border-0"
+									onClick={() => {
+										if (onRowClick) onRowClick(row.original);
+									}}
 								>
 									{row.getVisibleCells().map((cell) => (
 										<TableCell key={cell.id}>
@@ -131,22 +137,26 @@ export default function DataTable<TData, TValue>({
 					{table.getFilteredSelectedRowModel().rows.length} of{" "}
 					{table.getFilteredRowModel().rows.length} row(s) selected.
 				</div>
-				<Button
-					variant={"outline"}
-					size={"sm"}
-					onClick={() => table.previousPage()}
-					disabled={!table.getCanPreviousPage()}
-				>
-					Previous
-				</Button>
-				<Button
-					variant={"outline"}
-					size={"sm"}
-					onClick={() => table.nextPage()}
-					disabled={!table.getCanNextPage()}
-				>
-					Next
-				</Button>
+				{data.length >= PAGE_SIZE && (
+					<React.Fragment>
+						<Button
+							variant={"outline"}
+							size={"sm"}
+							onClick={() => table.previousPage()}
+							disabled={!table.getCanPreviousPage()}
+						>
+							Previous
+						</Button>
+						<Button
+							variant={"outline"}
+							size={"sm"}
+							onClick={() => table.nextPage()}
+							disabled={!table.getCanNextPage()}
+						>
+							Next
+						</Button>
+					</React.Fragment>
+				)}
 			</div>
 		</div>
 	);

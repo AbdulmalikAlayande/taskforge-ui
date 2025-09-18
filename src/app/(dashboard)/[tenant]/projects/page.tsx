@@ -76,7 +76,6 @@ const projectColumns: ColumnDef<ProjectResponse>[] = [
 		cell: ({ row }) => {
 			const dateValue = row.getValue("endDate");
 			if (!dateValue || typeof dateValue !== "string") return "-";
-			// Use date-fns for formatting
 			try {
 				const parsedDate = parseISO(dateValue);
 				return format(parsedDate, "MMM d, yyyy");
@@ -101,10 +100,26 @@ const Project = () => {
 		projects,
 	} = useOrganization();
 	const [createProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
+	const [path, setPath] = useState([
+		{
+			pathname: "Projects",
+			pathurl: "/projects",
+		},
+	]);
 
 	useEffect(() => {
 		console.log("Projects", projects);
 	}, [projects]);
+
+	const onProjectRowClick = (project: ProjectResponse) => {
+		setPath((prev) => [
+			...prev,
+			{
+				pathname: project.name,
+				pathurl: `/projects/${project.publicId}`,
+			},
+		]);
+	};
 
 	if (isLoading) {
 		return (
@@ -158,9 +173,15 @@ const Project = () => {
 				} as React.CSSProperties
 			}
 		>
-			<AppSidebar props={{ variant: "inset" }} organization={organization!} />
+			<AppSidebar
+				props={{ variant: "inset" }}
+				organization={organization!}
+				navbarPathProps={path}
+				// activeSection="Projects"
+				setNavbarPathProps={setPath}
+			/>
 			<SidebarInset>
-				<AppNavbar section={"Projects"} />
+				<AppNavbar section={"Projects"} pathProps={path} />
 				<div className="text-sm w-full border-b flex justify-between items-center px-2 py-1">
 					<Popover>
 						<PopoverTrigger asChild>
@@ -222,9 +243,13 @@ const Project = () => {
 					</div>
 				</div>
 				<div className="h-full w-full flex flex-col items-center px-6 py-2">
-					{projects ? (
+					{projects.length > 0 ? (
 						<div className="w-full">
-							<DataTable columns={projectColumns} data={projects} />
+							<DataTable
+								columns={projectColumns}
+								data={projects}
+								onRowClick={onProjectRowClick}
+							/>
 						</div>
 					) : (
 						<NoAvailableProjectView

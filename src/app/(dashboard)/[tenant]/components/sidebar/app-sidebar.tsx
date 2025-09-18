@@ -50,9 +50,21 @@ interface UserData {
 type AppSidebarProps = {
 	organization: OrganizationResponse;
 	props: React.ComponentProps<typeof Sidebar>;
+	navbarPathProps?: NavbarPathProps[];
+	setNavbarPathProps?: React.Dispatch<React.SetStateAction<NavbarPathProps[]>>;
 };
 
-export const AppSidebar = ({ organization, ...props }: AppSidebarProps) => {
+type NavbarPathProps = {
+	pathname: string;
+	pathurl: string;
+};
+
+export const AppSidebar = ({
+	organization,
+	navbarPathProps,
+	setNavbarPathProps,
+	...props
+}: AppSidebarProps) => {
 	const { getUserData } = useUserStorage();
 	const { tenantId } = useOrganization();
 	const [taskItems, setTaskItems] = useState<
@@ -97,7 +109,7 @@ export const AppSidebar = ({ organization, ...props }: AppSidebarProps) => {
 	const buildProjectItemFromOrganization = useCallback(() => {
 		return organization.projects.map((project) => ({
 			title: project.name,
-			url: `${tenantId}/projects/${project.publicId}`,
+			url: `/${tenantId}/projects/${project.publicId}`,
 		}));
 	}, [organization, tenantId]);
 
@@ -211,7 +223,11 @@ export const AppSidebar = ({ organization, ...props }: AppSidebarProps) => {
 				<TeamSwitcher teams={defaultTeams} />
 			</SidebarHeader>
 			<SidebarContent>
-				<MainWorkspace items={workspaceItems} />
+				<MainWorkspace
+					navbarPathProps={navbarPathProps}
+					items={workspaceItems}
+					setNavbarPathProps={setNavbarPathProps}
+				/>
 			</SidebarContent>
 			<SidebarFooter>
 				<UserAccountActions

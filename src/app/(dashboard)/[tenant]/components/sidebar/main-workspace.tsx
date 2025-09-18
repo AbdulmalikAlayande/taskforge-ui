@@ -32,8 +32,45 @@ type NavMainProps = {
 			url: string;
 		}[];
 	}[];
+	navbarPathProps?: NavbarPathProps[];
+	setNavbarPathProps?: React.Dispatch<React.SetStateAction<NavbarPathProps[]>>;
 };
-export const MainWorkspace = ({ items }: NavMainProps) => {
+
+type NavbarPathProps = {
+	pathname: string;
+	pathurl: string;
+};
+
+export const MainWorkspace = ({
+	items,
+	navbarPathProps,
+	setNavbarPathProps,
+}: NavMainProps) => {
+	function onSidebarMenuSubButtonClick(
+		navbarPathProps: NavbarPathProps[] | undefined,
+		subItem: { title: string; url: string }
+	): React.MouseEventHandler<HTMLAnchorElement> | undefined {
+		return () => {
+			if (setNavbarPathProps) {
+				setNavbarPathProps((prev: NavbarPathProps[]) => [
+					...prev,
+					{
+						pathname: subItem.title,
+						pathurl: subItem.url,
+					},
+				]);
+			}
+			navbarPathProps?.push({
+				pathname: subItem.title,
+				pathurl: subItem.url,
+			});
+			sessionStorage.setItem(
+				"navbarPathProps",
+				JSON.stringify(navbarPathProps)
+			);
+		};
+	}
+
 	return (
 		<SidebarGroup>
 			<SidebarGroupLabel>Workspace</SidebarGroupLabel>
@@ -59,7 +96,13 @@ export const MainWorkspace = ({ items }: NavMainProps) => {
 										<SidebarMenuSubItem
 											key={`${subItem.title}-${index + (index % 10)}`}
 										>
-											<SidebarMenuSubButton asChild>
+											<SidebarMenuSubButton
+												asChild
+												onClick={onSidebarMenuSubButtonClick(
+													navbarPathProps,
+													subItem
+												)}
+											>
 												<Link href={subItem.url}>
 													<Label>{subItem.title}</Label>
 												</Link>
