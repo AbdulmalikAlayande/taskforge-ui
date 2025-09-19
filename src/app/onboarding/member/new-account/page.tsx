@@ -31,6 +31,9 @@ const CreateAccountPage = () => {
 					route={"/auth/success"}
 					setResponse={setSignupResponse}
 				/>
+				<span className="sr-only text-sm text-muted-foreground">
+					{signupResponse?.active}
+				</span>
 			</div>
 		</div>
 	);
