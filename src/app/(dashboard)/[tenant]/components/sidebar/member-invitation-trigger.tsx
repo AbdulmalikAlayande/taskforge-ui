@@ -16,7 +16,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@src/components/ui/select";
-import { Loader2, MailIcon, UserPlus2 } from "lucide-react";
+import { MailIcon, UserPlus2 } from "lucide-react";
 import { useApiClient } from "@src/app/hooks/useApiClient";
 import { Input } from "@src/components/ui/input";
 import z from "zod";
@@ -34,10 +34,11 @@ import { Controller, useForm } from "react-hook-form";
 import { useUserStorage } from "@src/app/hooks/useUserStorage";
 import { toast } from "sonner";
 import Logger from "@src/lib/logger";
+import { Spinner } from "@src/components/ui/spinner";
 
 type InvitationRequest = {
 	email: string;
-	name: string;
+	inviteeName: string;
 	invitedBy: string;
 	organizationId: string;
 	role: string;
@@ -60,7 +61,7 @@ type InvitationResponse = {
 
 const FormSchema = z.object({
 	email: z.string().email("Invalid email address"),
-	name: z.string().min(1, "Name is required"),
+	inviteeName: z.string().min(1, "Name is required"),
 	role: z.string().min(1, "Role is required"),
 });
 
@@ -73,7 +74,7 @@ export const MemberInvitationTrigger = () => {
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
 			email: "",
-			name: "",
+			inviteeName: "",
 			role: "",
 		},
 	});
@@ -96,12 +97,25 @@ export const MemberInvitationTrigger = () => {
 			});
 
 			console.log("Invitation sent:", invitationResponse);
+			toast.success("Invitation sent successfully", {
+				position: "top-center",
+				style: {
+					width: "50vw",
+					height: "100px",
+				},
+				description: `An invitation email has been sent to ${invitationResponse.email}.`,
+			});
 			reset();
 			setIsOpen(false); // Close dialog on success
 		} catch (error) {
 			interface ApiError {
 				response?: {
-					data?: unknown;
+					data?: {
+						path?: string;
+						message?: string;
+						error?: string;
+						status?: number;
+					};
 				};
 				message?: string;
 			}
@@ -114,7 +128,7 @@ export const MemberInvitationTrigger = () => {
 					"data" in err.response
 				) {
 					toast.error("An unknown error occured", {
-						description: err.response.data as string,
+						description: err.response.data?.message as string,
 					});
 					Logger.error("Error inviting member:", {
 						"Error Response Data": err.response?.data,
@@ -171,7 +185,7 @@ export const MemberInvitationTrigger = () => {
 											type="text"
 											placeholder="Name"
 											variant={"normal"}
-											{...register("name")}
+											{...register("inviteeName")}
 										/>
 										<Input
 											id="email"
@@ -217,7 +231,10 @@ export const MemberInvitationTrigger = () => {
 										>
 											{isLoading || form.formState.isSubmitting ? (
 												<span className="w-full flex items-center justify-center gap-2 ">
-													<Loader2 className="animate-spin h-8 w-8 text-primary" />
+													<Spinner
+														variant="pinwheel"
+														className="text-primary-foreground"
+													/>
 													<span className="">Inviting</span>
 												</span>
 											) : (

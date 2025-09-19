@@ -12,6 +12,14 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
+export const isBlank = (str: string | null | undefined): boolean => {
+	return str === null || str === undefined || str.trim() === "";
+};
+
+export const hasContent = (str: string | null | undefined): boolean => {
+	return !isBlank(str);
+};
+
 export async function login(
 	request: LoginRequest,
 	updateSession: (data?: Session | null) => Promise<Session | null>

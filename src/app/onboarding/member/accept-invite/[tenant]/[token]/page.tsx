@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback } from "@src/components/ui/avatar";
 import { useApiClient } from "@src/app/hooks/useApiClient";
 import { Spinner } from "@src/components/ui/spinner";
 import { toast } from "sonner";
+import { hasContent } from "@src/lib/utils";
 
 type PayLoadProperties = {
 	name: string;
@@ -30,6 +31,8 @@ type PayLoadProperties = {
 	id: string;
 	role: string;
 	date: string;
+	inviterName: string;
+	organizationId: string;
 	organizationName: string;
 	organizationLogoUrl: string;
 };
@@ -50,7 +53,7 @@ type InvitationResponse = {
 };
 
 const InvitationView = () => {
-	const { token, tenant } = useParams<{ tenant: string; token: string }>();
+	const { token } = useParams<{ tenant: string; token: string }>();
 	const [invitationProperties, setInvitationProperties] =
 		React.useState<PayLoadProperties>();
 	const { apiClient } = useApiClient();
@@ -64,6 +67,8 @@ const InvitationView = () => {
 				if (!decodedJwtToken) return;
 				const payload = decodedJwtToken as PayLoadProperties;
 				setInvitationProperties(payload);
+				sessionStorage.setItem("current_tenant_id", payload.organizationId);
+				localStorage.setItem("current_tenant_id", payload.organizationId);
 				console.log("Decoded Payload:", payload);
 			} catch (error) {
 				console.error("Failed to decode token:", error);
@@ -94,29 +99,58 @@ const InvitationView = () => {
 	const acceptInvitation = async () => {
 		setIsLoading(true);
 		try {
-			const jwt = decodeBase64String(token || "");
 			const invitationResponse = await apiClient.post<InvitationResponse>(
-				`/members/accept-invitation`,
-				{
-					params: {
-						token: jwt,
-						tenant,
-					},
-				}
+				`/members/accept-invitation?token=${token}`
 			);
 
 			if (
 				invitationResponse &&
 				invitationResponse.status?.toLowerCase() === "accepted"
 			) {
-				// setInvitationSuccessful(true);
+				setIsLoading(false);
+				if (hasContent(invitationResponse.memberID)) {
+					toast.success("Invitation Accepted", {
+						duration: 5000,
+						position: "top-center",
+						action: {
+							label: "Close",
+							onClick: () => toast.dismiss(),
+						},
+						description: `You have successfully accepted the invitation. 
+							Please log in to continue.`,
+					});
+					router.push("/login");
+				} else {
+					toast.success("Invitation Accepted", {
+						duration: 7000,
+						position: "top-center",
+						action: {
+							label: "Close",
+							onClick: () => toast.dismiss(),
+						},
+						description: `You have successfully accepted the invitation. 
+							Seems like you don't have an account, please create one`,
+					});
+					router.push("/onboarding/member/new-account");
+				}
 			}
-			setIsLoading(false);
-			router.push("/login");
 		} catch (error) {
 			setIsLoading(false);
-			toast.error("", {
-				description: "",
+			toast.error("Unable to Accept Invitation", {
+				duration: 10_000,
+				position: "top-center",
+				action: {
+					label: "Close",
+					onClick: () => toast.dismiss(),
+				},
+				style: {
+					width: "400px",
+					height: "auto",
+					backgroundColor: "#FF0000",
+					color: "#FFFFFF",
+				},
+				description:
+					"We couldn't process your invitation. This could be because it expired, was revoked, or already accepted. Please contact the organization or try again.",
 			});
 			console.error("Error accepting invitation:", error);
 		}
@@ -195,8 +229,8 @@ const InvitationView = () => {
 
 						<div className="space-y-3">
 							<h2 className="text-xl font-medium text-foreground leading-tight">
-								{invitationProperties?.name || "A member"} invited you to join{" "}
-								{""}
+								{invitationProperties?.inviterName || "A member"} invited you to
+								join {""}
 								{invitationProperties?.organizationName || "their organization"}
 								&apos;s team on TaskForge
 								<br />

@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Label } from "@src/components/ui/label";
@@ -25,52 +24,22 @@ import { UserResponse } from "@src/lib/response-types";
 import { useUserStorage } from "@src/app/hooks/useUserStorage";
 import { useApiClient } from "@src/app/hooks/useApiClient";
 import { signIn, useSession } from "next-auth/react";
+import { SignupFormData, signupSchema } from "@src/lib/typing";
+import { Spinner } from "@src/components/ui/spinner";
 
-// Zod schema for form validation
-const signupSchema = z
-	.object({
-		firstName: z
-			.string()
-			.min(1, "First name is required")
-			.min(2, "First name must be at least 2 characters")
-			.max(50, "First name must be less than 50 characters"),
-		lastName: z
-			.string()
-			.min(1, "Last name is required")
-			.min(2, "Last name must be at least 2 characters")
-			.max(50, "Last name must be less than 50 characters"),
-		email: z
-			.string()
-			.min(1, "Email is required")
-			.email("Please enter a valid email address"),
-		password: z
-			.string()
-			.min(1, "Password is required")
-			.min(8, "Password must be at least 8 characters")
-			.regex(
-				/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-				"Password must contain at least one uppercase letter, one lowercase letter, and one number"
-			),
-		confirmPassword: z.string().min(1, "Please confirm your password"),
-		acceptTerms: z
-			.boolean()
-			.refine(
-				(val) => val === true,
-				"You must accept the terms and conditions"
-			),
-		marketingEmails: z.boolean(),
-	})
-	.refine((data) => data.password === data.confirmPassword, {
-		message: "Passwords don't match",
-		path: ["confirmPassword"],
-	});
-
-type SignupFormData = z.infer<typeof signupSchema>;
+type SignupFormProps = React.ComponentProps<"div"> & {
+	url: string;
+	route: string;
+	setResponse: (response: UserResponse) => void;
+};
 
 export function SignupForm({
+	url,
+	route,
+	setResponse,
 	className,
 	...props
-}: React.ComponentProps<"div">) {
+}: SignupFormProps) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [socialLoading, setSocialLoading] = useState<string | null>(null);
 	const [showPassword, setShowPassword] = useState(false);
@@ -123,8 +92,14 @@ export function SignupForm({
 
 			const response = await tenantAwareApiClient.apiClient.post<
 				UserResponse,
-				SignupFormData
-			>(`${process.env.NEXT_PUBLIC_API_URL!}/admin/create-new`, data);
+				SignupFormData & { organizationId: string }
+			>(`${process.env.NEXT_PUBLIC_API_URL!}${url}`, {
+				...data,
+				organizationId:
+					sessionStorage.getItem("current_tenant_id") ||
+					localStorage.getItem("current_tenant_id") ||
+					"",
+			});
 
 			if (loadingToast) {
 				toast.dismiss(loadingToast);
@@ -132,6 +107,7 @@ export function SignupForm({
 			}
 
 			if (response?.publicId) {
+				setResponse(response);
 				storeUserData(response);
 				toast.success("Account created successfully!", {
 					description: "Welcome to TaskForge! Let's set up your organization.",
@@ -173,7 +149,7 @@ export function SignupForm({
 
 				setTimeout(() => {
 					toast.dismiss();
-					router.push(`/onboarding/organization?userId=${response.publicId}`);
+					router.push(route);
 				}, 1500);
 			} else {
 				throw new Error("Invalid response from server");
@@ -258,7 +234,7 @@ export function SignupForm({
 						Create your account
 					</CardTitle>
 					<CardDescription className="text-base text-muted-foreground">
-						Sign up to get started with TaskForge
+						Sign up to get started on TaskForge
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-6">
@@ -525,7 +501,10 @@ export function SignupForm({
 						>
 							{isLoading || isSubmitting ? (
 								<>
-									<div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+									<Spinner
+										variant="pinwheel"
+										className="text-primary-foreground"
+									/>
 									Creating account...
 								</>
 							) : (
