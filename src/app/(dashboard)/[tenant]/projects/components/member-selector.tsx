@@ -1,4 +1,3 @@
-import { useFetch } from "@src/app/hooks/useFetch";
 import { useTenant } from "@src/components/tenant-provider";
 import { UserResponse } from "@src/lib/response-types";
 import Image from "next/image";
@@ -9,10 +8,12 @@ import {
 } from "@src/components/ui/popover";
 import { MoreHorizontal, Users2 } from "lucide-react";
 import { Button } from "@src/components/ui/button";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { UnorderedList, ListItem } from "@src/components/ui/list";
 import { Checkbox } from "@src/components/ui/checkbox";
 import { useIsMobile } from "@src/app/hooks/use-mobile";
+import { useApiClient } from "@src/app/hooks/useApiClient";
+import { Spinner } from "@src/components/ui/spinner";
 
 type MemberSelectorOption = {
 	id: string;
@@ -24,24 +25,47 @@ type MemberSelectorOption = {
 
 type MemberSelectorProps = {
 	onChange: (id: string) => void;
+	members?: UserResponse[];
 };
-export function MemberSelector({ onChange }: MemberSelectorProps) {
+export function MemberSelector({ onChange, members }: MemberSelectorProps) {
 	const isMobile = useIsMobile();
 	const { tenantId } = useTenant();
 	const [selectedMembers, setSelectedMembers] = React.useState<
 		MemberSelectorOption[]
 	>([]);
 
-	const fetchConfig = React.useMemo(
-		() => ({
-			url: `/organization/${tenantId}/members`,
-			queryKey: [`members-${tenantId}`],
-			enabled: !!tenantId,
-		}),
-		[tenantId]
-	);
+	const [teamMembers, setTeamMembers] = useState<UserResponse[]>([]);
+	const [loading, setLoading] = useState<boolean>(false);
+	const { apiClient } = useApiClient();
 
-	const { data, isLoading } = useFetch<UserResponse[]>(fetchConfig);
+	const fetchMembers = React.useCallback(async () => {
+		setLoading(true);
+		try {
+			const response = await apiClient.get<UserResponse[]>(
+				`/organization/${tenantId}/members`
+			);
+			if (response && response.length > 0) setTeamMembers(response);
+		} finally {
+			setLoading(false);
+		}
+	}, [apiClient, tenantId]);
+
+	useEffect(() => {
+		if (members && members.length > 0) {
+			setTeamMembers(members);
+		} else {
+			fetchMembers();
+		}
+	}, [members, fetchMembers]);
+
+	if (loading || teamMembers.length === 0) {
+		return (
+			<div className="w-full h-full flex flex-col justify-center items-center gap-2">
+				<Spinner variant="bars" className="text-accent-foreground" size={25} />
+				<span className="text-sm">Loading Team Members</span>
+			</div>
+		);
+	}
 
 	return (
 		<Popover>
@@ -85,9 +109,9 @@ export function MemberSelector({ onChange }: MemberSelectorProps) {
 				sideOffset={8}
 				className="w-72 rounded-md border bg-popover text-popover-foreground shadow-md p-0"
 			>
-				{data ? (
+				{teamMembers.length > 0 ? (
 					<UnorderedList selectable>
-						{data.map((member) => (
+						{teamMembers.map((member) => (
 							<ListItem
 								key={member.publicId}
 								onSelect={() => onChange(member.publicId)}
@@ -95,7 +119,7 @@ export function MemberSelector({ onChange }: MemberSelectorProps) {
 									member.image ? (
 										<Image
 											src={member.image}
-											alt={`${member.firstname} ${member.lastname}`}
+											alt={`${member.firstName} ${member.lastName}`}
 											className="w-6 h-6 rounded-full"
 										/>
 									) : (
@@ -115,11 +139,11 @@ export function MemberSelector({ onChange }: MemberSelectorProps) {
 											} else {
 												const newMember: MemberSelectorOption = {
 													id: member.publicId,
-													name: `${member.firstname} ${member.lastname}`,
+													name: `${member.firstName} ${member.lastName}`,
 													icon: member.image ? (
 														<Image
 															src={member.image}
-															alt={`${member.firstname} ${member.lastname}`}
+															alt={`${member.firstName} ${member.lastName}`}
 															width={24}
 															height={24}
 															className="rounded-full"
@@ -142,12 +166,10 @@ export function MemberSelector({ onChange }: MemberSelectorProps) {
 										}
 									}}
 								/>
-								{`${member.firstname} ${member.lastname}`}
+								{`${member.firstName} ${member.lastName}`}
 							</ListItem>
 						))}
 					</UnorderedList>
-				) : isLoading ? (
-					<div className="p-4 text-center">Loading...</div>
 				) : (
 					<div className="p-4 text-center">No members found</div>
 				)}

@@ -21,7 +21,7 @@ import DatePicker from "@src/components/ui/date-picker";
 import { Separator } from "@src/components/ui/separator";
 import { useState } from "react";
 import { Button } from "@src/components/ui/button";
-import { ProjectResponse } from "@src/lib/response-types";
+import { OrganizationResponse, ProjectResponse } from "@src/lib/response-types";
 import { toast } from "sonner";
 import { useApiClient } from "@src/app/hooks/useApiClient";
 
@@ -40,6 +40,7 @@ const defaultProjectData: ProjectRequest = {
 	summary: "",
 	startDate: "",
 	endDate: "",
+	teamLeadId: "",
 	memberIds: [],
 	status: ProjectStatus.ACTIVE,
 	priority: ProjectPriority.HIGH,
@@ -50,8 +51,9 @@ const CreateProjectPopover: React.FC<{
 	tenantId: string;
 	dialogOpen: boolean;
 	setDialogOpen: (dialogOpen: boolean) => void;
+	organization: OrganizationResponse;
 	controller: ReactNode | JSX.Element;
-}> = ({ tenantId, dialogOpen, setDialogOpen, controller }) => {
+}> = ({ tenantId, dialogOpen, setDialogOpen, organization, controller }) => {
 	const [startDate, setStartDate] = useState<Date>();
 	const [endDate, setEndDate] = useState<Date>();
 	const { apiClient } = useApiClient();
@@ -67,18 +69,12 @@ const CreateProjectPopover: React.FC<{
 				case "category":
 					return { ...prev, category: id.toUpperCase() as ProjectCategory };
 				case "lead":
-					return { ...prev, leadId: id };
+					return { ...prev, teamLeadId: id };
 				case "member":
-					// For members, we need to toggle the member in the array
 					const memberIds = [...prev.memberIds];
-					const memberIndex = memberIds.indexOf(id);
-
-					if (memberIndex >= 0) {
-						memberIds.splice(memberIndex, 1);
-					} else {
+					if (!memberIds.includes(id)) {
 						memberIds.push(id);
 					}
-
 					return { ...prev, memberIds };
 				default:
 					return prev;
@@ -220,9 +216,12 @@ const CreateProjectPopover: React.FC<{
 								onChange={(id) => handleOptionClick(id, "category")}
 							/>
 							<TeamLeadSelector
+								tenantId={tenantId}
+								members={organization.members}
 								onChange={(id) => handleOptionClick(id, "lead")}
 							/>
 							<MemberSelector
+								members={organization.members}
 								onChange={(id) => handleOptionClick(id, "member")}
 							/>
 							<DatePicker

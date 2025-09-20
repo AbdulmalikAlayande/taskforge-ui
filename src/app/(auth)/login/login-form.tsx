@@ -21,6 +21,7 @@ import Logger from "@src/lib/logger";
 import { toast } from "sonner";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Spinner } from "@src/components/ui/spinner";
 
 const loginSchema = z.object({
 	email: z
@@ -255,7 +256,11 @@ export function LoginForm({
 							>
 								{isLoading || isSubmitting ? (
 									<>
-										<div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+										<Spinner
+											variant="pinwheel"
+											className="text-accent-foreground"
+											size={"100%"}
+										/>
 										Logging in...
 									</>
 								) : (

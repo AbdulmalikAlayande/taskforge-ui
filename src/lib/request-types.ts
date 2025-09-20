@@ -51,6 +51,7 @@ export interface ProjectRequest {
 	startDate: string;
 	endDate: string;
 	organizationId: string;
+	teamLeadId: string;
 	memberIds: string[];
 	status: ProjectStatus;
 	priority: ProjectPriority;

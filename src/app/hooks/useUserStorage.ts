@@ -16,8 +16,8 @@ export function useUserStorage() {
 		const storageData: StoredUserData = {
 			publicId: userData.publicId,
 			email: userData.email,
-			firstName: userData.firstname,
-			lastName: userData.lastname,
+			firstName: userData.firstName,
+			lastName: userData.lastName,
 			image: userData.image,
 			organizationId: userData.organizationId,
 			createdAt: userData.createdAt,

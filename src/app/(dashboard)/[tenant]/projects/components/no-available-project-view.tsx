@@ -3,12 +3,14 @@ import { Boxes } from "lucide-react";
 import React from "react";
 import CreateProjectPopover from "./create-project-popover";
 import { Button } from "@src/components/ui/button";
+import { OrganizationResponse } from "@src/lib/response-types";
 
 export const NoAvailableProjectView: React.FC<{
 	tenantId: string;
 	dialogOpen: boolean;
+	organization: OrganizationResponse;
 	setDialogOpen: (dialogOpen: boolean) => void;
-}> = ({ tenantId, dialogOpen, setDialogOpen }) => {
+}> = ({ tenantId, dialogOpen, setDialogOpen, organization }) => {
 	return (
 		<div className="h-full w-full md:w-2/3 lg:1/2 flex flex-col justify-center text-muted-foreground text-sm">
 			<Boxes size={32} color="currentColor" />
@@ -38,6 +40,7 @@ export const NoAvailableProjectView: React.FC<{
 						Create new project
 					</Button>
 				}
+				organization={organization}
 			/>
 		</div>
 	);

@@ -108,8 +108,9 @@ const Project = () => {
 	]);
 
 	useEffect(() => {
-		console.log("Projects", projects);
-	}, [projects]);
+		// 	console.log("Organization:: ", organization);
+		// 	console.log("Projects:: ", projects);
+	}, []);
 
 	const onProjectRowClick = (project: ProjectResponse) => {
 		setPath((prev) => [
@@ -215,6 +216,7 @@ const Project = () => {
 							tenantId={tenantId}
 							dialogOpen={createProjectDialogOpen}
 							setDialogOpen={setCreateProjectDialogOpen}
+							organization={organization!}
 							controller={
 								<Button
 									className="h-7 text-sm text-accent-foreground"
@@ -254,6 +256,7 @@ const Project = () => {
 					) : (
 						<NoAvailableProjectView
 							tenantId={tenantId}
+							organization={organization!}
 							dialogOpen={createProjectDialogOpen}
 							setDialogOpen={setCreateProjectDialogOpen}
 						/>

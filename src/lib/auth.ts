@@ -123,8 +123,8 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 						user.backendData = {
 							publicId: user.email,
 							email: user.email,
-							firstname,
-							lastname,
+							firstName: firstname,
+							lastName: lastname,
 							image: user.image || "",
 						} as UserResponse;
 						return true;
@@ -146,8 +146,8 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 						user.backendData = {
 							publicId: user.email,
 							email: user.email,
-							firstname,
-							lastname,
+							firstName: firstname,
+							lastName: lastname,
 							image: user.image || "",
 						} as UserResponse;
 						return true;

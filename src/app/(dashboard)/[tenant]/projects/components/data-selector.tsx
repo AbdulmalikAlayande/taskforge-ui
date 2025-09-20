@@ -1,5 +1,5 @@
 import ProjectDataSelector from "./project-data-selector";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
 	Loader,
 	Clock,
@@ -29,6 +29,9 @@ import {
 	SignalLow,
 	MoreHorizontal,
 } from "lucide-react";
+import { UserResponse } from "@src/lib/response-types";
+import { Spinner } from "@src/components/ui/spinner";
+import { useApiClient } from "@src/app/hooks/useApiClient";
 
 type SelectorProps = {
 	onChange: (id: string) => void;
@@ -227,7 +230,6 @@ const categoryOptions = [
 ];
 
 export function CategorySelector({ onChange }: SelectorProps) {
-	// Memoize the handler to prevent unnecessary re-renders
 	const handleChange = React.useCallback(
 		(id: string) => {
 			onChange(id);
@@ -249,8 +251,51 @@ export function CategorySelector({ onChange }: SelectorProps) {
 	);
 }
 
-export function TeamLeadSelector({ onChange }: SelectorProps) {
-	// Memoize the handler to prevent unnecessary re-renders
+type TeamLeadSelectorProps = SelectorProps & {
+	tenantId: string;
+	members: UserResponse[];
+};
+
+export function TeamLeadSelector({
+	onChange,
+	tenantId,
+	members,
+}: TeamLeadSelectorProps) {
+	const [teamMembers, setTeamMembers] = useState<UserResponse[]>([]);
+	const [loading, setLoading] = useState<boolean>(false);
+	const { apiClient } = useApiClient();
+
+	const fetchMembers = React.useCallback(async () => {
+		setLoading(true);
+		try {
+			const response = await apiClient.get<UserResponse[]>(
+				`/organization/${tenantId}/members`
+			);
+			if (response && response.length > 0) setTeamMembers(response);
+		} finally {
+			setLoading(false);
+		}
+	}, [apiClient, tenantId]);
+
+	useEffect(() => {
+		if (members && members.length > 0) {
+			setTeamMembers(members);
+		} else {
+			fetchMembers();
+		}
+	}, [members, fetchMembers]);
+
+	const teamLeadSelectorOptions = React.useMemo(
+		() =>
+			teamMembers.map((member, index) => ({
+				id: member.publicId,
+				name: `${member.firstName} ${member.lastName}`,
+				icon: <User />,
+				value: index + 1,
+			})),
+		[teamMembers]
+	);
+
 	const handleChange = React.useCallback(
 		(id: string) => {
 			onChange(id);
@@ -258,22 +303,19 @@ export function TeamLeadSelector({ onChange }: SelectorProps) {
 		[onChange]
 	);
 
-	const teamLeadSelectorOptions = React.useMemo(
-		() => [
-			{
-				id: "",
-				name: "",
-				icon: <User />,
-				value: 1,
-			},
-		],
-		[]
-	);
+	if (loading || teamLeadSelectorOptions.length === 0) {
+		return (
+			<div className="w-full h-full flex flex-coljustify-center items-center gap-2">
+				<Spinner variant="bars" className="text-accent-foreground" size={25} />
+				<span className="text-sm">Loading Team Members</span>
+			</div>
+		);
+	}
 
 	return (
 		<ProjectDataSelector
-			selectedId={teamLeadSelectorOptions[0].name}
-			options={[]}
+			selectedId={teamLeadSelectorOptions[0].id}
+			options={teamLeadSelectorOptions}
 			onChange={handleChange}
 			placeholder={"Change team lead"}
 			keybinding={["P", "L"]}

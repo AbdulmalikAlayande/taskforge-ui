@@ -21,8 +21,8 @@ export interface UserResponse {
 	publicId: string;
 	organizationId: string;
 	email: string;
-	firstname: string;
-	lastname: string;
+	firstName: string;
+	lastName: string;
 	image?: string;
 	createdAt: string;
 	lastModifiedAt: string;
@@ -87,6 +87,7 @@ export interface OrganizationResponse {
 	websiteUrl?: string;
 	logoUrl?: string;
 	projects: ProjectResponse[];
+	members: UserResponse[];
 }
 
 export interface ProjectResponse {
