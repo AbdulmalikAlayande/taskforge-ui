@@ -219,44 +219,28 @@ export const AppSidebar = ({
 	);
 
 	return (
-		<Sidebar
-			collapsible="icon"
-			className="overflow-hidden *:data-[sidebar=sidebar]:flex-row"
-			{...props}
-		>
-			<Sidebar collapsible="icon" {...props}>
-				<SidebarHeader>
-					<TeamSwitcher teams={defaultTeams} />
-				</SidebarHeader>
-				<SidebarContent>
-					<MainWorkspace
-						navbarPathProps={navbarPathProps}
-						items={workspaceItems}
-						setNavbarPathProps={setNavbarPathProps}
-					/>
-				</SidebarContent>
-				<SidebarFooter>
-					<UserAccountActions
-						user={{
-							name: userData?.name || "Unknown User",
-							email: userData?.email || "unknown@example.com",
-							avatar: userData?.avatar || "UU",
-						}}
-					/>
-					<MemberInvitationTrigger />
-				</SidebarFooter>
-				<SidebarRail />
-			</Sidebar>
-
-			<Sidebar collapsible="icon" className="hidden flex-1 md:flex">
-				<SidebarHeader className="gap-3.5 border-b p-4">
-					<div className="flex w-full items-center justify-between">
-						<div className="text-foreground text-base font-medium">
-							{organization.name}
-						</div>
-					</div>
-				</SidebarHeader>
-			</Sidebar>
+		<Sidebar collapsible="icon" {...props}>
+			<SidebarHeader>
+				<TeamSwitcher teams={defaultTeams} />
+			</SidebarHeader>
+			<SidebarContent>
+				<MainWorkspace
+					navbarPathProps={navbarPathProps}
+					items={workspaceItems}
+					setNavbarPathProps={setNavbarPathProps}
+				/>
+			</SidebarContent>
+			<SidebarFooter>
+				<UserAccountActions
+					user={{
+						name: userData?.name || "Unknown User",
+						email: userData?.email || "unknown@example.com",
+						avatar: userData?.avatar || "",
+					}}
+				/>
+				<MemberInvitationTrigger />
+			</SidebarFooter>
+			<SidebarRail />
 		</Sidebar>
 	);
 };
