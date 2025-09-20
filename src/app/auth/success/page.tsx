@@ -108,7 +108,11 @@ export default function AuthSuccessPage() {
 					return;
 				}
 
-				await handleAuthenticationSuccess(session!.user.id, userData, "oauth");
+				await handleAuthenticationSuccess(
+					session!.user.id || sessionStorage.getItem("user_id")!,
+					userData,
+					"oauth"
+				);
 			} else {
 				// Firefox - simple wait for OAuth
 				await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -120,7 +124,11 @@ export default function AuthSuccessPage() {
 					return;
 				}
 
-				await handleAuthenticationSuccess(session!.user.id, userData, "oauth");
+				await handleAuthenticationSuccess(
+					session!.user.id || sessionStorage.getItem("user_id")!,
+					userData,
+					"oauth"
+				);
 			}
 		};
 
@@ -140,7 +148,7 @@ export default function AuthSuccessPage() {
 					authType,
 					intent: authIntent,
 					provider: authProvider,
-					userId: userId,
+					userId,
 				});
 
 				if (authIntent === "signup") {
