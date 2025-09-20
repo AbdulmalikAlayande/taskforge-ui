@@ -12,9 +12,19 @@ export function useApiClient() {
 		let accessToken;
 		if (typeof window !== "undefined" && window.sessionStorage) {
 			accessToken = sessionStorage.getItem("next-auth.access-token");
+			console.log("In useApiClient:: Testing Access token:: ", accessToken);
 		}
-
+		console.log("2: In useApiClient:: Testing Access token:: ", accessToken);
 		if (accessToken) apiClient.setAuthHeader(accessToken);
+		console.log(
+			"In useApiClient:: Testing Auth Header:: ",
+			apiClient.getAuthHeader()
+		);
+
+		console.log(
+			"In useApiClient:: Testing All Headers:: ",
+			apiClient.getAllHeaders()
+		);
 
 		let tenantId;
 		if (typeof window !== "undefined" && window.localStorage) {
@@ -23,6 +33,7 @@ export function useApiClient() {
 				apiClient.setCustomHeader("X-Tenant-ID", tenantId);
 			}
 		}
+		console.log("In useApiClient:: Testing Local Storage data:: ", tenantId);
 
 		// if (process.env.NODE_ENV === "development") {
 		// 	Logger.debug(`API Client Auth Header:: ${apiClient.getAuthHeader()}`);

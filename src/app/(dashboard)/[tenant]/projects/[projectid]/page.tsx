@@ -20,6 +20,7 @@ import ProjectListView from "./project-list-view";
 import ProjectOverview from "./project-overview";
 import ProjectTimelineView from "./project-timeline-view";
 import ProjectCalendar from "./project-calendar";
+import { Spinner } from "@src/components/ui/spinner";
 
 const ProjectPage = () => {
 	const params = useParams<{ tenant: string; projectid: string }>();
@@ -60,9 +61,10 @@ const ProjectPage = () => {
 		console.log(project);
 	}, [hasOrganization, organization, params.projectid, apiClient]);
 
-	if (isLoading) {
+	if (isLoading || project === undefined || project === null) {
 		return (
 			<div className="min-h-screen flex items-center justify-center">
+				<Spinner variant="pinwheel" className="text-primary" size={65} />
 				<div>Loading project...</div>
 			</div>
 		);
@@ -99,7 +101,7 @@ const ProjectPage = () => {
 			/>
 			<SidebarInset>
 				<AppNavbar section={"Projects"} pathProps={navbarPathProps} />
-				<div className="bg-yellow-100 w-full">
+				<div className="w-full">
 					<Tabs className="" defaultValue="overview">
 						<TabsList className="w-full rounded-none border-b">
 							<TabsTrigger value={"overview"}>Overview</TabsTrigger>

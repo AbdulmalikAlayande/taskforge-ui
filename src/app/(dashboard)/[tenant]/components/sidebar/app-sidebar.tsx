@@ -15,8 +15,10 @@ import { UserAccountActions } from "./user-account-actions";
 import {
 	BarChart2,
 	FolderClosed,
+	Inbox,
 	ListTodo,
 	MailCheck,
+	MessageCircle,
 	type LucideIcon,
 } from "lucide-react";
 import { useUserStorage } from "@src/app/hooks/useUserStorage";
@@ -37,6 +39,7 @@ interface WorkspaceItem {
 	items?: Array<{
 		title: string;
 		url: string;
+		icon?: LucideIcon;
 	}>;
 }
 
@@ -189,22 +192,20 @@ export const AppSidebar = ({
 				],
 			},
 			{
-				title: "Inbox",
-				url: "/inbox",
+				title: "Messages",
+				url: "/messages",
 				icon: MailCheck,
 				isActive: true,
 				items: [
 					{
-						title: "Read",
-						url: "/inbox/read",
+						title: "Chats",
+						url: "/messages/all",
+						icon: MessageCircle,
 					},
 					{
-						title: "Unread",
-						url: "/inbox/unread",
-					},
-					{
-						title: "Archived",
-						url: "/inbox/archived",
+						title: "Inbox",
+						url: "/messages/inbox",
+						icon: Inbox,
 					},
 				],
 			},
@@ -218,28 +219,44 @@ export const AppSidebar = ({
 	);
 
 	return (
-		<Sidebar collapsible="icon" {...props}>
-			<SidebarHeader>
-				<TeamSwitcher teams={defaultTeams} />
-			</SidebarHeader>
-			<SidebarContent>
-				<MainWorkspace
-					navbarPathProps={navbarPathProps}
-					items={workspaceItems}
-					setNavbarPathProps={setNavbarPathProps}
-				/>
-			</SidebarContent>
-			<SidebarFooter>
-				<UserAccountActions
-					user={{
-						name: userData?.name || "Unknown User",
-						email: userData?.email || "unknown@example.com",
-						avatar: userData?.avatar || "",
-					}}
-				/>
-				<MemberInvitationTrigger />
-			</SidebarFooter>
-			<SidebarRail />
+		<Sidebar
+			collapsible="icon"
+			className="overflow-hidden *:data-[sidebar=sidebar]:flex-row"
+			{...props}
+		>
+			<Sidebar collapsible="icon" {...props}>
+				<SidebarHeader>
+					<TeamSwitcher teams={defaultTeams} />
+				</SidebarHeader>
+				<SidebarContent>
+					<MainWorkspace
+						navbarPathProps={navbarPathProps}
+						items={workspaceItems}
+						setNavbarPathProps={setNavbarPathProps}
+					/>
+				</SidebarContent>
+				<SidebarFooter>
+					<UserAccountActions
+						user={{
+							name: userData?.name || "Unknown User",
+							email: userData?.email || "unknown@example.com",
+							avatar: userData?.avatar || "UU",
+						}}
+					/>
+					<MemberInvitationTrigger />
+				</SidebarFooter>
+				<SidebarRail />
+			</Sidebar>
+
+			<Sidebar collapsible="icon" className="hidden flex-1 md:flex">
+				<SidebarHeader className="gap-3.5 border-b p-4">
+					<div className="flex w-full items-center justify-between">
+						<div className="text-foreground text-base font-medium">
+							{organization.name}
+						</div>
+					</div>
+				</SidebarHeader>
+			</Sidebar>
 		</Sidebar>
 	);
 };
