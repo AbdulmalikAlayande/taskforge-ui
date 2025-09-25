@@ -1,8 +1,6 @@
 import NextAuth from "next-auth";
 import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
-import Apple from "next-auth/providers/apple";
-import Meta from "next-auth/providers/facebook";
 import { UserResponse } from "./response-types";
 import { OAuthRequest } from "./request-types";
 import { apiClient } from "./apiClient";
@@ -48,14 +46,13 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 		Google({
 			clientId: process.env.GOOGLE_CLIENT_ID!,
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-		}),
-		Apple({
-			clientId: process.env.APPLE_CLIENT_ID!,
-			clientSecret: process.env.APPLE_CLIENT_SECRET!,
-		}),
-		Meta({
-			clientId: process.env.FACEBOOK_CLIENT_ID!,
-			clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
+			authorization: {
+				params: {
+					prompt: "consent",
+					access_type: "offline",
+					response_type: "code",
+				},
+			},
 		}),
 	],
 
