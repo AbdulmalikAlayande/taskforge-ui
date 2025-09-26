@@ -1,12 +1,12 @@
-import Navbar from "./navbar";
-import Hero from "./hero";
-import { ValueProposition } from "./value-proposition";
-import { Features } from "./features";
-import { IntegrationHub } from "./integration-hub";
-import { Testimonials } from "./testimonials";
-import { Pricing } from "./pricing";
-import { CTA } from "./cta";
-import { Footer } from "./footer";
+import Navbar from "./home/navbar";
+import Hero from "./home/hero";
+import { ValueProposition } from "./home/value-proposition";
+import { Features } from "./home/features";
+import { IntegrationHub } from "./home/integration-hub";
+import { Testimonials } from "./home/testimonials";
+import { Pricing } from "./home/pricing";
+import { CTA } from "./home/cta";
+import { Footer } from "./home/footer";
 
 export default function Home() {
 	return (

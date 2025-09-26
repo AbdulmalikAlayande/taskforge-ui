@@ -35,15 +35,6 @@ export async function login(
 			throw new Error("Login failed: Empty response from server");
 		}
 
-		Logger.debug(
-			"Login API response received: " +
-				JSON.stringify({
-					hasAccessToken: !!response.accessToken,
-					hasRefreshToken: !!response.refreshToken,
-					userId: response.userId,
-				})
-		);
-
 		if (!response.accessToken || !response.refreshToken) {
 			throw new Error("Login failed: Missing tokens in response");
 		}
@@ -73,17 +64,6 @@ export async function login(
 				},
 				expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
 			} as Session;
-
-			Logger.debug(
-				"Session update data prepared: " +
-					JSON.stringify({
-						accessToken: sessionUpdateData.accessToken ? "present" : "missing",
-						refreshToken: sessionUpdateData.refreshToken
-							? "present"
-							: "missing",
-						userId: sessionUpdateData.user?.id,
-					})
-			);
 
 			const updatedSession = await updateSession(sessionUpdateData);
 

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Logger from "@src/lib/logger";
 import { useUserStorage } from "@src/app/hooks/useUserStorage";
+import { Spinner } from "@src/components/ui/spinner";
 
 export default function AuthSuccessPage() {
 	const { data: session, status } = useSession();
@@ -194,9 +195,16 @@ export default function AuthSuccessPage() {
 		return (
 			<div className="min-h-screen flex items-center justify-center">
 				<div className="text-center">
-					<div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+					<Spinner variant="pinwheel" size={64} className="text-primary" />
 					<p className="text-muted-foreground">Completing authentication...</p>
 				</div>
+			</div>
+		);
+	} else if (status === "unauthenticated") {
+		return (
+			<div className="min-h-screen min-w-screen flex flex-col items-center justify-center text-center p-4">
+				<p>Authentication Failed.</p>
+				<p>Please log in to continue.</p>
 			</div>
 		);
 	}

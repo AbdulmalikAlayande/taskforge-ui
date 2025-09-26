@@ -93,7 +93,7 @@ export function LoginForm({
 
 			setTimeout(() => {
 				toast.dismiss();
-				router.push(`/auth/success`);
+				router.push(`api/auth/success`);
 			}, 1500);
 		} catch (error) {
 			Logger.error(`Login error:: ${error}`);
@@ -107,13 +107,11 @@ export function LoginForm({
 		try {
 			Logger.info(`Initiating ${provider} login`);
 
-			// Store intent in sessionStorage for post-auth handling
 			sessionStorage.setItem("auth_intent", "login");
 			sessionStorage.setItem("auth_provider", provider);
 
-			// Use NextAuth's client-side signIn
 			const result = await signIn(provider, {
-				callbackUrl: "/auth/success",
+				callbackUrl: "api/auth/success",
 				redirect: false,
 			});
 

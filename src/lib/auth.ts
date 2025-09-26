@@ -2,9 +2,7 @@ import NextAuth from "next-auth";
 import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import { UserResponse } from "./response-types";
-import { OAuthRequest } from "./request-types";
-import { apiClient } from "./apiClient";
-import Logger from "./logger";
+
 declare module "next-auth" {
 	interface Session {
 		accessToken?: string;
@@ -70,110 +68,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 	},
 
 	callbacks: {
-		async signIn({ user, account }) {
-			try {
-				Logger.info(`OAuth signIn attempt with ${account?.provider}`, {
-					email: user.email,
-					provider: account?.provider,
-					hasEmail: !!user?.email,
-					hasName: !!user?.name,
-				});
-
-				if (!user?.email) {
-					Logger.error("Missing email from OAuth provider", { user, account });
-					return false;
-				}
-
-				let lastname: string = "";
-				let firstname: string = "";
-				let lastnameParts: string[] = [];
-
-				if (user.name) {
-					[firstname, ...lastnameParts] = user.name.split(" ");
-					lastname = lastnameParts.join(" ") || "";
-				} else {
-					firstname = user.email.split("@")[0];
-					lastname = "";
-				}
-
-				const oauthData: OAuthRequest = {
-					email: user.email,
-					firstname,
-					lastname,
-					image: user.image || "",
-					provider: account?.provider || "",
-					providerId: account?.providerAccountId || "",
-				};
-
-				Logger.info("Sending OAuth data to backend", {
-					email: oauthData.email,
-					provider: oauthData.provider,
-					apiUrl: process.env.NEXT_PUBLIC_API_URL,
-				});
-
-				if (!process.env.NEXT_PUBLIC_API_URL) {
-					Logger.error("NEXT_PUBLIC_API_URL not configured");
-					if (process.env.NODE_ENV === "development") {
-						Logger.warning("Development mode: proceeding without backend sync");
-						user.id = user.email;
-						user.backendId = user.email;
-						user.backendData = {
-							publicId: user.email,
-							email: user.email,
-							firstName: firstname,
-							lastName: lastname,
-							image: user.image || "",
-						} as UserResponse;
-						return true;
-					}
-					return false;
-				}
-
-				const response = await apiClient.post<UserResponse, OAuthRequest>(
-					`${process.env.NEXT_PUBLIC_API_URL}/auth/oauth`,
-					oauthData
-				);
-
-				if (!response) {
-					Logger.error("Backend sync failed: No response from server");
-					if (process.env.NODE_ENV === "development") {
-						Logger.warning("Development mode: proceeding without backend sync");
-						user.id = user.email;
-						user.backendId = user.email;
-						user.backendData = {
-							publicId: user.email,
-							email: user.email,
-							firstName: firstname,
-							lastName: lastname,
-							image: user.image || "",
-						} as UserResponse;
-						return true;
-					}
-					return false;
-				}
-
-				user.id = response.publicId;
-				user.backendId = response.publicId;
-				user.backendData = response;
-
-				Logger.info(
-					`User ${user.email} successfully authenticated and synced`,
-					{
-						backendId: response.publicId,
-					}
-				);
-				return true;
-			} catch (error) {
-				Logger.error(`OAuth signIn failed:`, {
-					error: error instanceof Error ? error.message : error,
-					provider: account?.provider,
-					email: user?.email,
-				});
-				return false;
-			}
-		},
-
 		async jwt({ token, user, account }) {
+			console.log("JWT callback:", { token, user, account });
+
 			if (user?.backendId) {
 				token.backendId = user.backendId;
 			}
