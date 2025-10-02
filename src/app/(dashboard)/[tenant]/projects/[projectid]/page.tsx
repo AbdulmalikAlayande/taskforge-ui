@@ -17,10 +17,11 @@ import {
 import ProjectBoardView from "./project-board-view";
 import ProjectDashboard from "./project-dashboard";
 import ProjectListView from "./project-list-view";
-import ProjectOverview from "./project-overview";
 import ProjectTimelineView from "./project-timeline-view";
 import ProjectCalendar from "./project-calendar";
 import { Spinner } from "@src/components/ui/spinner";
+// import ProjectOverview from "./projectoverview/page-overview2";
+import { ProjectOverview } from "./projectoverview/project-overview";
 
 const ProjectPage = () => {
 	const params = useParams<{ tenant: string; projectid: string }>();
@@ -59,7 +60,7 @@ const ProjectPage = () => {
 			}
 		}
 		console.log(project);
-	}, [hasOrganization, organization, params.projectid, apiClient]);
+	}, [hasOrganization, organization, params.projectid, apiClient, project]);
 
 	if (isLoading || project === undefined || project === null) {
 		return (
@@ -112,27 +113,21 @@ const ProjectPage = () => {
 							<TabsTrigger value={"calendar"}>Calendar</TabsTrigger>
 						</TabsList>
 						<TabsContent value={"overview"}>
-							Overview
 							<ProjectOverview project={project!} />
 						</TabsContent>
 						<TabsContent value={"list"}>
-							List
 							<ProjectListView project={project!} />
 						</TabsContent>
 						<TabsContent value={"board"}>
-							Board
 							<ProjectBoardView project={project!} />
 						</TabsContent>
 						<TabsContent value={"timeline"}>
-							Timeline
 							<ProjectTimelineView project={project!} />
 						</TabsContent>
 						<TabsContent value={"dashboard"}>
-							Dashboard
 							<ProjectDashboard project={project!} />
 						</TabsContent>
 						<TabsContent value={"calendar"}>
-							Calendar
 							<ProjectCalendar project={project!} />
 						</TabsContent>
 					</Tabs>
