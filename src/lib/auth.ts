@@ -2,6 +2,8 @@ import NextAuth from "next-auth";
 import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import { UserResponse } from "./response-types";
+import { getApiUrl } from "./config";
+import { apiClient } from "./apiClient";
 
 declare module "next-auth" {
 	interface Session {
@@ -68,52 +70,30 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 	},
 
 	callbacks: {
-		async jwt({ token, user, account }) {
-			console.log("JWT callback:", { token, user, account });
-
-			if (user?.backendId) {
-				token.backendId = user.backendId;
+		async signIn({ user, account, profile }) {
+			if (!user && !account) {
+				return false;
 			}
+			try {
+				const response = await apiClient.post(getApiUrl("/api/auth/oauth"), {
+					provider: account?.provider,
+					accessToken: account?.access_token,
+					email: user.email,
+					name: user.name || profile?.name,
+					imageUrl: user.image,
+					providerId: account?.providerAccountId,
+				});
+				console.log("OAuth backend response:", response);
 
-			if (user?.backendData) {
-				token.backendData = user.backendData;
+				return true;
+			} catch (error) {
+				console.error("Backend OAuth integration failed:", error);
+				return false;
 			}
-
-			if (account) {
-				token.provider = account.provider;
-				token.accessToken = account.access_token;
-				token.refreshToken = account.refresh_token;
-			}
-
-			return token;
 		},
 
-		async session({ session, token }) {
-			if (token.backendId && session.user) {
-				session.user.id = token.backendId as string;
-			}
-
-			if (token.backendData && session.user) {
-				session.user = {
-					...session.user,
-					...token.backendData,
-					id: token.backendId as string,
-				};
-			}
-
-			if (token.provider) {
-				session.provider = token.provider as string;
-			}
-
-			if (token.accessToken) {
-				session.accessToken = token.accessToken as string;
-			}
-
-			if (token.refreshToken) {
-				session.refreshToken = token.refreshToken as string;
-			}
-
-			return session;
+		async jwt({ token, user, account }) {
+			return { ...token, ...user, ...account };
 		},
 	},
 
