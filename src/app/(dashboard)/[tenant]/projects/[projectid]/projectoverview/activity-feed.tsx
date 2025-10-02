@@ -30,9 +30,9 @@ export function ActivityFeed({ activities = [] }: ActivityFeedProps) {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle className="text-base">
+				<CardTitle className="flex items-center gap-2 text-base">
 					<Activity className="h-6 w-6" />
-					Activity
+					<p>Activity</p>
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
