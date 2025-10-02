@@ -12,7 +12,7 @@ import { Button } from "@src/components/ui/button";
 import { Separator } from "@src/components/ui/separator";
 import { SidebarTrigger } from "@src/components/ui/sidebar";
 import { TypographyP } from "@src/components/ui/typography";
-import { HelpCircle, Sparkles } from "lucide-react";
+import { Badge, BellIcon, HelpCircle, Sparkles } from "lucide-react";
 import React from "react";
 
 type AppNavbarProps = {
@@ -66,7 +66,15 @@ export const AppNavbar = ({ pathProps }: AppNavbarProps) => {
 					>
 						<Sparkles />
 					</Button>
-
+					<Button
+						variant="ghost"
+						size="icon"
+						className="hidden sm:flex dark:text-foreground"
+					>
+						<Badge>
+							<BellIcon />
+						</Badge>
+					</Button>
 					<ModeToggle />
 				</div>
 			</div>
