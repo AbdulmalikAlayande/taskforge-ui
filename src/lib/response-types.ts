@@ -73,7 +73,6 @@ export interface PaginatedResponse<T> {
 		totalPages: number;
 	};
 }
-
 export interface OrganizationResponse {
 	publicId: string;
 	name: string;
@@ -90,25 +89,67 @@ export interface OrganizationResponse {
 	members: UserResponse[];
 }
 
+export enum ProjectCategory {
+	BUILDING = "BUILDING",
+	SOFTWARE = "SOFTWARE",
+	DESIGN = "DESIGN",
+	MARKETING = "MARKETING",
+	SALES = "SALES",
+	HUMAN_RESOURCES = "HUMAN_RESOURCES",
+	FINANCE = "FINANCE",
+	OPERATIONS = "OPERATIONS",
+	LEGAL = "LEGAL",
+	IT_SUPPORT = "IT_SUPPORT",
+	ENTERTAINMENT = "ENTERTAINMENT",
+	OTHER = "OTHER",
+}
+
+export enum ProjectStatus {
+	ACTIVE = "ACTIVE",
+	PAUSED = "PAUSED",
+	COMPLETED = "COMPLETED",
+	ABANDONED = "ABANDONED",
+	ARCHIVED = "ARCHIVED",
+	BACKLOG = "BACKLOG",
+	IN_PROGRESS = "IN_PROGRESS",
+	CANCELLED = "CANCELLED",
+}
+
+export enum ProjectPriority {
+	LOW = "LOW",
+	MEDIUM = "MEDIUM",
+	HIGH = "HIGH",
+	NO_PRIORITY = "NO_PRIORITY",
+	URGENT = "URGENT",
+}
+
 export interface ProjectResponse {
 	id: string;
 	publicId: string;
 	name: string;
 	summary: string;
 	description: string;
-	startDate: Date;
-	endDate: Date;
+	startDate: string;
+	endDate: string;
 	organizationId: string;
 	memberIds: string[];
-	status: string;
-	priority: string;
-	category: string;
-	createdAt: Date;
-	updatedAt: Date;
+	status: ProjectStatus;
+	priority: ProjectPriority;
+	category: ProjectCategory;
+	createdAt: string;
+	lastModifiedAt: string;
 }
 
 export interface MemberResponse {
 	publicId: string;
+	firstName: string;
+	lastName: string;
+	email: string;
+	image?: string;
+	organizationId?: string;
+	role: Role;
+	createdAt: string;
+	lastModifiedAt: string;
 }
 
 export enum TaskCategory {
