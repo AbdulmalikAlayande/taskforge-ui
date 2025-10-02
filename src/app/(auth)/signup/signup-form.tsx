@@ -202,7 +202,7 @@ export function SignupForm({
 			sessionStorage.setItem("auth_provider", provider);
 
 			const result = await signIn(provider, {
-				callbackUrl: "/auth/success",
+				callbackUrl: "/api/auth/success",
 				redirect: false,
 			});
 

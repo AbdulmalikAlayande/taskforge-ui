@@ -93,7 +93,7 @@ export function LoginForm({
 
 			setTimeout(() => {
 				toast.dismiss();
-				router.push(`api/auth/success`);
+				router.push(`/api/auth/success`);
 			}, 1500);
 		} catch (error) {
 			Logger.error(`Login error:: ${error}`);
@@ -111,12 +111,11 @@ export function LoginForm({
 			sessionStorage.setItem("auth_provider", provider);
 
 			const result = await signIn(provider, {
-				callbackUrl: "api/auth/success",
+				callbackUrl: "/api/auth/success",
 				redirect: false,
 			});
 
 			if (result?.error) {
-				Logger.error(`${provider} login error:`, { error: result.error });
 				toast.error(`${provider} login failed`, {
 					description:
 						result.error === "AccessDenied"
@@ -124,7 +123,6 @@ export function LoginForm({
 							: "An unexpected error occurred. Please try again.",
 				});
 			} else if (result?.url) {
-				// Redirect manually since we used redirect: false
 				window.location.href = result.url;
 			}
 		} catch (error) {
