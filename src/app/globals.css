@@ -198,6 +198,29 @@
 	animation-play-state: paused;
 }
 
+/*  */
+@keyframes slideInFromRight {
+	from {
+		opacity: 0;
+		transform: translateX(0px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(20px);
+	}
+}
+
+@keyframes slideOutToRight {
+	from {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateX(20px);
+	}
+}
+
 /* globals.css */
 
 /* .scrollbar-hidden {
