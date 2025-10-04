@@ -60,20 +60,45 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 	},
 
 	callbacks: {
+		/**
+		 * CRITICAL FIX: This callback now properly:
+		 * 1. Sends OAuth token to YOUR backend
+		 * 2. Receives YOUR JWT tokens back
+		 * 3. Stores YOUR tokens for API calls
+		 */
 		async signIn({ user, account, profile }) {
-			if (!user && !account) {
+			if (!user || !account) {
 				return false;
 			}
+
 			try {
-				const response = await apiClient.post(getApiUrl("/api/auth/oauth"), {
-					provider: account?.provider,
-					accessToken: account?.access_token,
+				console.log("Processing OAuth sign in for provider:", account.provider);
+
+				const response = await apiClient.post<{
+					userId: string;
+					email: string;
+					accessToken: string;
+					refreshToken: string;
+					tenantId?: string;
+					organizationId?: string;
+				}>(getApiUrl("/api/auth/oauth"), {
+					provider: account.provider,
+					accessToken: account.access_token,
 					email: user.email,
 					name: user.name || profile?.name,
 					imageUrl: user.image,
-					providerId: account?.providerAccountId,
+					providerId: account.providerAccountId,
 				});
-				console.log("OAuth backend response:", response);
+
+				console.log("Backend OAuth response received");
+
+				user.backendToken = response.accessToken;
+				user.refreshToken = response.refreshToken;
+				user.id = response.userId;
+
+				if (response.tenantId) {
+					sessionStorage.setItem("current_tenant_id", response.tenantId);
+				}
 
 				return true;
 			} catch (error) {
@@ -82,8 +107,55 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 			}
 		},
 
-		async jwt({ token, user, account }) {
-			return { ...token, ...user, ...account };
+		async jwt({ token, user, account, trigger }) {
+			// Initial sign in
+			if (user) {
+				token.backendToken = user.backendToken;
+				token.refreshToken = user.refreshToken;
+				token.userId = user.id;
+				token.provider = account?.provider;
+			}
+
+			// Handle token refresh if needed
+			if (trigger === "update" && token.refreshToken) {
+				try {
+					// Call your backend refresh endpoint
+					const response = await apiClient.post<{
+						accessToken: string;
+						refreshToken: string;
+					}>(
+						getApiUrl("/api/auth/refresh"),
+						{},
+						{
+							headers: {
+								"X-Refresh-Token": token.refreshToken as string,
+							},
+						}
+					);
+
+					token.backendToken = response.accessToken;
+					token.refreshToken = response.refreshToken;
+				} catch (error) {
+					console.error("Token refresh failed:", error);
+					// Token refresh failed, user needs to re-login
+					return null;
+				}
+			}
+
+			return token;
+		},
+
+		/**
+		 * Session callback - Make YOUR backend token available to the frontend
+		 */
+		async session({ session, token }) {
+			if (token) {
+				session.backendToken = token.backendToken as string;
+				session.refreshToken = token.refreshToken as string;
+				session.provider = token.provider as string;
+				session.user.id = token.userId as string;
+			}
+			return session;
 		},
 	},
 
