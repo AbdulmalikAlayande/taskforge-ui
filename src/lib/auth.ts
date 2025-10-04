@@ -7,7 +7,6 @@ import { apiClient } from "./apiClient";
 
 declare module "next-auth" {
 	interface Session {
-		accessToken?: string;
 		backendToken?: string;
 		refreshToken?: string;
 		provider?: string;
@@ -16,7 +15,7 @@ declare module "next-auth" {
 			email?: string | null;
 			name?: string | null;
 			image?: string | null;
-		} & UserResponse;
+		} & Partial<UserResponse>;
 	}
 
 	interface User {
@@ -24,15 +23,7 @@ declare module "next-auth" {
 		email?: string | null;
 		name?: string | null;
 		image?: string | null;
-		backendId?: string;
-		backendData?: UserResponse;
-	}
-
-	interface JWT {
-		backendId?: string;
-		backendData?: UserResponse;
-		provider?: string;
-		accessToken?: string;
+		backendToken?: string;
 		refreshToken?: string;
 	}
 }
