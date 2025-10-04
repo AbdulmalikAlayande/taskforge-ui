@@ -164,11 +164,11 @@ export default function AuthSuccessPage() {
 						description: "Welcome back to TaskForge!",
 					});
 
-					const tenantId = getCurrentTenantId();
+					const tenantId = session?.tenantId || getCurrentTenantId();
 					if (!tenantId) {
 						Logger.error("No tenant ID found after login", {
 							storedTenantId: tenantId,
-							userId: userId,
+							userId,
 						});
 						router.push("/login");
 						return;
