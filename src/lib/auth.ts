@@ -47,7 +47,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 		}),
 	],
 
-	// Chrome-specific cookie configuration
 	cookies: {
 		sessionToken: {
 			name: "next-auth.session-token",
