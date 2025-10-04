@@ -21,7 +21,7 @@ import { useApiClient } from "@src/app/hooks/useApiClient";
 import { Input } from "@src/components/ui/input";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Role } from "@src/lib/response-types";
+import { Role } from "@src/lib/enumeration";
 import { SidebarMenu, SidebarMenuItem } from "@src/components/ui/sidebar";
 import {
 	Dialog,

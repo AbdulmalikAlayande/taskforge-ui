@@ -24,14 +24,13 @@ import { Button } from "@src/components/ui/button";
 import { OrganizationResponse, ProjectResponse } from "@src/lib/response-types";
 import { toast } from "sonner";
 import { useApiClient } from "@src/app/hooks/useApiClient";
-
 import Logger from "@src/lib/logger";
+import { ProjectRequest } from "@src/lib/request-types";
 import {
 	ProjectCategory,
 	ProjectPriority,
-	ProjectRequest,
 	ProjectStatus,
-} from "@src/lib/request-types";
+} from "@src/lib/enumeration";
 
 const defaultProjectData: ProjectRequest = {
 	name: "",

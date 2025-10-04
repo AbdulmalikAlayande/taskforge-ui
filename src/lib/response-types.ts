@@ -1,8 +1,12 @@
-export enum Role {
-	ORGANIZATION_MEMBER = "ORGANIZATION_MEMBER",
-	ORGANIZATION_ADMIN = "ORGANIZATION_ADMIN",
-	ORGANIZATION_OWNER = "ORGANIZATION_OWNER",
-}
+import {
+	Role,
+	ProjectStatus,
+	ProjectPriority,
+	ProjectCategory,
+	TaskStatus,
+	TaskPriority,
+	TaskCategory,
+} from "./enumeration";
 
 export interface LoginResponse {
 	userId: string;
@@ -89,40 +93,6 @@ export interface OrganizationResponse {
 	members: UserResponse[];
 }
 
-export enum ProjectCategory {
-	BUILDING = "BUILDING",
-	SOFTWARE = "SOFTWARE",
-	DESIGN = "DESIGN",
-	MARKETING = "MARKETING",
-	SALES = "SALES",
-	HUMAN_RESOURCES = "HUMAN_RESOURCES",
-	FINANCE = "FINANCE",
-	OPERATIONS = "OPERATIONS",
-	LEGAL = "LEGAL",
-	IT_SUPPORT = "IT_SUPPORT",
-	ENTERTAINMENT = "ENTERTAINMENT",
-	OTHER = "OTHER",
-}
-
-export enum ProjectStatus {
-	ACTIVE = "ACTIVE",
-	PAUSED = "PAUSED",
-	COMPLETED = "COMPLETED",
-	ABANDONED = "ABANDONED",
-	ARCHIVED = "ARCHIVED",
-	BACKLOG = "BACKLOG",
-	IN_PROGRESS = "IN_PROGRESS",
-	CANCELLED = "CANCELLED",
-}
-
-export enum ProjectPriority {
-	LOW = "LOW",
-	MEDIUM = "MEDIUM",
-	HIGH = "HIGH",
-	NO_PRIORITY = "NO_PRIORITY",
-	URGENT = "URGENT",
-}
-
 export interface ProjectResponse {
 	id: string;
 	publicId: string;
@@ -150,27 +120,6 @@ export interface MemberResponse {
 	role: Role;
 	createdAt: string;
 	lastModifiedAt: string;
-}
-
-export enum TaskCategory {
-	BUG = "BUG",
-	FEATURE = "FEATURE",
-	IMPROVEMENT = "IMPROVEMENT",
-	RESEARCH = "RESEARCH",
-}
-
-export enum TaskPriority {
-	LOW = "LOW",
-	MEDIUM = "MEDIUM",
-	HIGH = "HIGH",
-	CRITICAL = "CRITICAL",
-}
-
-export enum TaskStatus {
-	TODO = "TODO",
-	IN_PROGRESS = "IN_PROGRESS",
-	DONE = "DONE",
-	ARCHIVED = "ARCHIVED",
 }
 
 export interface TaskResponse {
