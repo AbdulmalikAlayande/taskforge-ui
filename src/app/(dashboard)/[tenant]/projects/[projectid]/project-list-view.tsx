@@ -185,7 +185,7 @@ const ProjectListView = ({ project }: ProjectListViewProps) => {
 	const createNewTask = async (event: React.MouseEvent<HTMLButtonElement>) => {
 		event.preventDefault();
 		const response = await apiClient.post<TaskResponse, TaskRequest>(
-			`/task/createNew`,
+			`/tasks/create-new`,
 			{
 				title: "",
 				projectId: "",
