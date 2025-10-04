@@ -53,9 +53,10 @@ export function SignupForm({
 	const loadingToastRef = useRef<string | number | null>(null);
 
 	useEffect(() => {
+		const currentToastId = loadingToastRef.current;
 		return () => {
-			if (loadingToastRef.current) {
-				toast.dismiss(loadingToastRef.current);
+			if (currentToastId) {
+				toast.dismiss(currentToastId);
 			}
 		};
 	}, []);

@@ -41,13 +41,6 @@ export async function login(
 
 		try {
 			const currentSession = await updateSession();
-			Logger.debug(
-				"Current session before update: " +
-					JSON.stringify({
-						hasAccessToken: !!currentSession?.accessToken,
-						userId: currentSession?.user?.id,
-					})
-			);
 
 			const sessionUpdateData = {
 				accessToken: response.accessToken,
@@ -65,16 +58,7 @@ export async function login(
 				expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
 			} as Session;
 
-			const updatedSession = await updateSession(sessionUpdateData);
-
-			Logger.debug(
-				"Session update result: " +
-					JSON.stringify({
-						successful: !!updatedSession,
-						hasAccessToken: !!updatedSession?.accessToken,
-						userId: updatedSession?.user?.id,
-					})
-			);
+			await updateSession(sessionUpdateData);
 
 			const manualUpdateResult = manuallyUpdateAuthSession(response);
 			Logger.info("Manual session update result:", { manualUpdateResult });
@@ -121,7 +105,6 @@ const manuallyUpdateAuthSession = (loginResponse: LoginResponse) => {
 			Logger.debug("User ID stored in session storage");
 		}
 
-		// Store tenant/organization ID from backend response
 		const tenantId = loginResponse.tenantId || loginResponse.organizationId;
 		if (tenantId) {
 			sessionStorage.setItem("current_tenant_id", tenantId);
