@@ -10,6 +10,7 @@ declare module "next-auth" {
 		backendToken?: string;
 		refreshToken?: string;
 		provider?: string;
+		tenantId?: string;
 		user: {
 			id: string;
 			email?: string | null;
@@ -25,6 +26,7 @@ declare module "next-auth" {
 		image?: string | null;
 		backendToken?: string;
 		refreshToken?: string;
+		tenantId?: string;
 	}
 }
 
@@ -81,7 +83,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 					refreshToken: string;
 					tenantId?: string;
 					organizationId?: string;
-				}>(getApiUrl("/api/auth/oauth"), {
+				}>(getApiUrl("/auth/oauth"), {
 					provider: account.provider,
 					accessToken: account.access_token,
 					email: user.email,
@@ -90,15 +92,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 					providerId: account.providerAccountId,
 				});
 
-				console.log("Backend OAuth response received");
-
 				user.backendToken = response.accessToken;
 				user.refreshToken = response.refreshToken;
 				user.id = response.userId;
-
-				if (response.tenantId) {
-					sessionStorage.setItem("current_tenant_id", response.tenantId);
-				}
+				user.tenantId = response.tenantId || response.organizationId;
 
 				return true;
 			} catch (error) {
@@ -108,23 +105,21 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 		},
 
 		async jwt({ token, user, account, trigger }) {
-			// Initial sign in
 			if (user) {
 				token.backendToken = user.backendToken;
 				token.refreshToken = user.refreshToken;
 				token.userId = user.id;
 				token.provider = account?.provider;
+				token.tenantId = user.tenantId;
 			}
 
-			// Handle token refresh if needed
 			if (trigger === "update" && token.refreshToken) {
 				try {
-					// Call your backend refresh endpoint
 					const response = await apiClient.post<{
 						accessToken: string;
 						refreshToken: string;
 					}>(
-						getApiUrl("/api/auth/refresh"),
+						getApiUrl("/auth/refresh"),
 						{},
 						{
 							headers: {
@@ -145,15 +140,13 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 			return token;
 		},
 
-		/**
-		 * Session callback - Make YOUR backend token available to the frontend
-		 */
 		async session({ session, token }) {
 			if (token) {
 				session.backendToken = token.backendToken as string;
 				session.refreshToken = token.refreshToken as string;
 				session.provider = token.provider as string;
 				session.user.id = token.userId as string;
+				session.tenantId = token.tenantId as string;
 			}
 			return session;
 		},
@@ -161,7 +154,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
 	pages: {
 		signIn: "/login",
-		error: "/auth/error",
+		error: "/api/auth/error",
 	},
 
 	debug: process.env.NODE_ENV === "development",
