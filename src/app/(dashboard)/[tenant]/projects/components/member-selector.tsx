@@ -131,55 +131,27 @@ export function MemberSelector({
 				sideOffset={8}
 				className="w-72 rounded-md border bg-popover text-popover-foreground shadow-md p-0"
 			>
-				{teamMembers.length > 0 ? (
-					<UnorderedList selectable>
-						{teamMembers.map((member) => (
-							<ListItem
-								key={member.publicId}
-								onSelect={() => onChange(member.publicId)}
-								icon={
-									member.image ? (
-										<Image
-											src={member.image}
-											alt={`${member.firstName} ${member.lastName}`}
-											className="w-6 h-6 rounded-full"
-										/>
-									) : (
-										<MoreHorizontal />
-									)
-								}
-							>
+				<Command>
+					<div className="h-10 flex items-baseline justify-between px-2">
+						<CommandInput className="h-10" placeholder={label} />
+						<span className="h-full text-xs text-muted-foreground flex items-center gap-1">
+							<Kbd className="border-border">Alt</Kbd>
+							<span>then</span>
+							<Kbd className="border-border">G</Kbd>
+						</span>
+					</div>
+					<CommandSeparator />
+					<CommandList>
+						<CommandEmpty>No members found</CommandEmpty>
+						{members.map((member, index) => (
+							<CommandItem key={member.publicId}>
 								<Checkbox
 									className="mr-2"
 									checked={selectedMembers.some(
 										(m) => m.id === member.publicId
 									)}
 									onCheckedChange={(checked) => {
-										setSelectedMembers((prev) => {
-											if (prev.some((m) => m.id === member.publicId)) {
-												return prev.filter((m) => m.id !== member.publicId);
-											} else {
-												const newMember: MemberSelectorOption = {
-													id: member.publicId,
-													name: `${member.firstName} ${member.lastName}`,
-													icon: member.image ? (
-														<Image
-															src={member.image}
-															alt={`${member.firstName} ${member.lastName}`}
-															width={24}
-															height={24}
-															className="rounded-full"
-														/>
-													) : (
-														MoreHorizontal
-													),
-													value: member.publicId,
-												};
-												return [...prev, newMember];
-											}
-										});
-
-										// Only call onChange when there's a change
+										handleCheckChange(member);
 										if (
 											checked !==
 											selectedMembers.some((m) => m.id === member.publicId)
