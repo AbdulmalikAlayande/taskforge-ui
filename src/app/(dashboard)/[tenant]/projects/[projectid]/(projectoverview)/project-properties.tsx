@@ -108,6 +108,15 @@ export function ProjectProperties({
 								)}
 							</div>
 						</div>
+						<div className="h-full bg-red-400">
+							<MemberSelector
+								userIcon={<Plus className="" />}
+								label={"Add members"}
+								members={organizationMembers || []}
+								isLoading={false}
+								onChange={(id) => console.log("Selected member:", id)}
+							/>
+						</div>
 					</div>
 
 					{/* Dates */}
