@@ -99,7 +99,6 @@ export function ProjectProperties({
 		fetchMembers();
 	}, [tenantId, hasFetched, getOrganization, apiClient]);
 
-	// Handle member addition
 	const handleAddMember = (memberId: string) => {
 		console.log("Adding member to project:", memberId);
 		// TODO: Implement API call to add member to project
@@ -108,7 +107,6 @@ export function ProjectProperties({
 		});
 	};
 
-	// Retry fetching members
 	const handleRetryFetch = () => {
 		setHasFetched(false);
 		setHasErrorOrgMembers(false);
@@ -119,7 +117,6 @@ export function ProjectProperties({
 			<div>
 				<h3 className="mb-3 text-sm font-medium">Project Properties</h3>
 				<div className="space-y-4">
-					{/* Members */}
 					<div className="flex items-start gap-3">
 						<div className="flex h-5 w-5 items-center justify-center">
 							<Users className="h-4 w-4 text-muted-foreground" />
