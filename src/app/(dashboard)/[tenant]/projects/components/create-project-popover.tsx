@@ -178,13 +178,6 @@ const CreateProjectPopover: React.FC<{
 				}}
 			>
 				<DialogTrigger asChild>{controller}</DialogTrigger>
-				{/* 
-		w-full sm:max-w-md md:max-w-lg lg:max-w-xl max-h-[90vh]
-		max-w-[95vw] sm:w-[500px] max-h-[90vh]
-		sm:max-w-120 md:max-w-170 lg:max-w-220 sm:max-h-150 w-400 h-140
-		w-[100vh] max-w-[95vw] max-h-[90vh]
-		*/}
-
 				<DialogContent className="p-4 overflow-auto rounded-xl min-w-[90vw] max-w-[95vw] lg:min-w-[60vw] lg:max-w-[70vw] ">
 					<DialogHeader className="flex flex-col gap-4 mb-4">
 						<DialogTitle className="w-full text-lg text-left">
