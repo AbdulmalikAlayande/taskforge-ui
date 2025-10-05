@@ -108,17 +108,17 @@ export function MemberSelector({
 								<span key={member.id} className="flex items-center gap-2">
 									{React.isValidElement(member.icon)
 										? member.icon
-										: React.createElement(member.icon)}
+										: React.createElement(member.icon as React.ElementType)}
 									{member.name}
 								</span>
 							))
 						) : (
 							<>
 								{isMobile ? (
-									<Users2 />
+									userIcon
 								) : (
 									<span className="w-full h-full flex items-center justify-between rounded-md gap-2">
-										<Users2 /> <span>Members</span>
+										{userIcon} <span>{label}</span>
 									</span>
 								)}
 							</>
