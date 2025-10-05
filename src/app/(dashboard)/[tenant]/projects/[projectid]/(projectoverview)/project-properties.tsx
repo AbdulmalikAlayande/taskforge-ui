@@ -50,15 +50,12 @@ export function ProjectProperties({
 	const [hasErrorOrgMembers, setHasErrorOrgMembers] = useState(false);
 	const [hasFetched, setHasFetched] = useState(false);
 
-	// Memoize tenant ID to prevent unnecessary re-renders
 	const tenantId = useMemo(
 		() => session?.tenantId || getCurrentTenantId() || "",
 		[session?.tenantId, getCurrentTenantId]
 	);
 
-	// Fetch organization members only once
 	useEffect(() => {
-		// Prevent multiple fetches
 		if (!tenantId || hasFetched) return;
 
 		const fetchMembers = async () => {
@@ -66,7 +63,6 @@ export function ProjectProperties({
 			setHasErrorOrgMembers(false);
 
 			try {
-				// Try IndexedDB first for instant loading
 				const organization = await getOrganization(tenantId);
 
 				if (organization?.members && organization.members.length > 0) {
@@ -74,7 +70,6 @@ export function ProjectProperties({
 					setHasFetched(true);
 					setIsLoadingOrgMembers(false);
 
-					// Fetch fresh data in background to update cache
 					apiClient
 						.get<MemberResponse[]>(`/organization/${tenantId}/members`)
 						.then((freshMembers) => {
@@ -84,7 +79,6 @@ export function ProjectProperties({
 							// Silent fail - we already have cached data
 						});
 				} else {
-					// No cached data, fetch from API
 					const response = await apiClient.get<MemberResponse[]>(
 						`/organization/${tenantId}/members`
 					);
