@@ -61,6 +61,28 @@ const CreateProjectPopover: React.FC<{
 	const [endDate, setEndDate] = useState<Date>();
 	const { apiClient } = useApiClient();
 	const [project, setProject] = useState<ProjectRequest>(defaultProjectData);
+	const [teamMembers, setTeamMembers] = useState<MemberResponse[]>([]);
+	const [loadingTeamMembers, setLoadingTeammembers] = useState<boolean>(false);
+
+	const fetchMembers = React.useCallback(async () => {
+		setLoadingTeammembers(true);
+		try {
+			const response = await apiClient.get<MemberResponse[]>(
+				`/organization/${tenantId}/members`
+			);
+			if (response && response.length > 0) setTeamMembers(response);
+		} finally {
+			setLoadingTeammembers(false);
+		}
+	}, [apiClient, tenantId]);
+
+	useEffect(() => {
+		if (organization.members && organization.members.length > 0) {
+			setTeamMembers(organization.members);
+		} else {
+			fetchMembers();
+		}
+	}, [organization.members, fetchMembers]);
 
 	const handleOptionClick = (id: string, selectorType?: string) => {
 		setProject((prev) => {
