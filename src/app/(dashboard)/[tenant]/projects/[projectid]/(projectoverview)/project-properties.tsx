@@ -39,12 +39,18 @@ export function ProjectProperties({
 	const { data: session } = useSession();
 	const { getOrganization } = useIndexedDB();
 	const { getCurrentTenantId } = useUserStorage();
+	const { apiClient } = useApiClient();
 	const [organizationMembers, setOrganizationMembers] =
 		useState<MemberResponse[]>();
 
-	const fetchOrganizationMembers = () => {
-		return [];
-	};
+	const fetchOrganizationMembers = React.useCallback(() => {
+		apiClient
+			.get<MemberResponse[]>("")
+			.then((response) => {
+				setOrganizationMembers(response);
+			})
+			.catch((error) => console.log("An error occured", { error }));
+	}, [apiClient]);
 
 	const getOrganizationMembers = React.useCallback(async () => {
 		const organization = await getOrganization(
@@ -52,7 +58,12 @@ export function ProjectProperties({
 		);
 		if (organization) setOrganizationMembers(organization.members);
 		else fetchOrganizationMembers();
-	}, [getOrganization, session?.tenantId, getCurrentTenantId]);
+	}, [
+		getOrganization,
+		session?.tenantId,
+		getCurrentTenantId,
+		fetchOrganizationMembers,
+	]);
 
 	useEffect(() => {
 		getOrganizationMembers();
