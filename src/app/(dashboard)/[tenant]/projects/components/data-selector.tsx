@@ -132,7 +132,6 @@ const priorityOptions = [
 ];
 
 export function PrioritySelector({ onChange }: SelectorProps) {
-	// Memoize the handler to prevent unnecessary re-renders
 	const handleChange = React.useCallback(
 		(id: string) => {
 			onChange(id);
