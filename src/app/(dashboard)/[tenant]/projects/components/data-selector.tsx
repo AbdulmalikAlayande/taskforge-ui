@@ -260,14 +260,14 @@ export function TeamLeadSelector({
 	tenantId,
 	members,
 }: TeamLeadSelectorProps) {
-	const [teamMembers, setTeamMembers] = useState<UserResponse[]>([]);
+	const [teamMembers, setTeamMembers] = useState<MemberResponse[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
 	const { apiClient } = useApiClient();
 
 	const fetchMembers = React.useCallback(async () => {
 		setLoading(true);
 		try {
-			const response = await apiClient.get<UserResponse[]>(
+			const response = await apiClient.get<MemberResponse[]>(
 				`/organization/${tenantId}/members`
 			);
 			if (response && response.length > 0) setTeamMembers(response);
