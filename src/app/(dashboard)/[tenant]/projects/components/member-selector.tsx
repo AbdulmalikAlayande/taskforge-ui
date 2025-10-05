@@ -160,14 +160,43 @@ export function MemberSelector({
 										}
 									}}
 								/>
-								{`${member.firstName} ${member.lastName}`}
-							</ListItem>
+								<span className="flex flex-col items-center gap-2 bg-green-200">
+									<span className="w-full h-fit flex items-center gap-2 text-sm text-start bg-blue-200">
+										<span className="text-sm">
+											{member.image ? (
+												<Image
+													src={member.image}
+													alt={`${member.firstName} ${member.lastName}`}
+													width={24}
+													height={24}
+													className="w-6 h-6 rounded-full"
+												/>
+											) : (
+												<User />
+											)}
+										</span>
+										{getUserName(member)}
+									</span>
+									<span className="w-full h-fit text-xs text-start text-muted-foreground bg-red-200">
+										{member.email}
+									</span>
+								</span>
+
+								<CommandShortcut className="h-full">
+									{index + 1}
+								</CommandShortcut>
+							</CommandItem>
 						))}
-					</UnorderedList>
-				) : (
-					<div className="p-4 text-center">No members found</div>
-				)}
+					</CommandList>
+				</Command>
 			</PopoverContent>
 		</Popover>
 	);
 }
+
+/*
+<ListItem
+	key={member.publicId}
+	onSelect={() => onChange(member.publicId)}
+></ListItem>
+*/
