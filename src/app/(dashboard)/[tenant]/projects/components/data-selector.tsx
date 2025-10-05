@@ -29,7 +29,7 @@ import {
 	SignalLow,
 	MoreHorizontal,
 } from "lucide-react";
-import { UserResponse } from "@src/lib/response-types";
+import { MemberResponse } from "@src/lib/response-types";
 import { Spinner } from "@src/components/ui/spinner";
 import { useApiClient } from "@src/app/hooks/useApiClient";
 
