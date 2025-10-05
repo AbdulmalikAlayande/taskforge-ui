@@ -252,7 +252,7 @@ export function CategorySelector({ onChange }: SelectorProps) {
 
 type TeamLeadSelectorProps = SelectorProps & {
 	tenantId: string;
-	members: UserResponse[];
+	members: MemberResponse[];
 };
 
 export function TeamLeadSelector({
