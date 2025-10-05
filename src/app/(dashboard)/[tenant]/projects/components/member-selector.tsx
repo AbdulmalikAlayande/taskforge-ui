@@ -160,8 +160,8 @@ export function MemberSelector({
 										}
 									}}
 								/>
-								<span className="flex flex-col items-center gap-2 bg-green-200">
-									<span className="w-full h-fit flex items-center gap-2 text-sm text-start bg-blue-200">
+								<span className="flex flex-col items-center gap-2">
+									<span className="w-full h-fit flex items-center gap-2 text-sm text-start">
 										<span className="text-sm">
 											{member.image ? (
 												<Image
