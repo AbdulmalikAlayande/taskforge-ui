@@ -16,12 +16,12 @@ import {
 } from "@src/components/ui/tabs";
 import ProjectBoardView from "./project-board-view";
 import ProjectDashboard from "./project-dashboard";
-import ProjectListView from "./project-list-view";
+import ProjectListView from "./(projectlistview)/project-list-view";
 import ProjectTimelineView from "./project-timeline-view";
 import ProjectCalendar from "./project-calendar";
 import { Spinner } from "@src/components/ui/spinner";
 // import ProjectOverview from "./projectoverview/page-overview2";
-import { ProjectOverview } from "./projectoverview/project-overview";
+import { ProjectOverview } from "./(projectoverview)/project-overview";
 
 const ProjectPage = () => {
 	const params = useParams<{ tenant: string; projectid: string }>();
