@@ -131,7 +131,7 @@ export function ProjectProperties({
 							<Users className="h-4 w-4 text-muted-foreground" />
 						</div>
 						<div className="flex-1 space-y-2">
-							<p className="text-sm text-muted-foreground">Members</p>
+							<p className="text-sm font-medium text-foreground">Members</p>
 							<div className="flex items-center gap-2">
 								{isLoadingMembers ? (
 									<div className="flex gap-2">
@@ -140,45 +140,66 @@ export function ProjectProperties({
 										<Skeleton className="h-8 w-8 rounded-full" />
 									</div>
 								) : hasErrorMembers ? (
-									<p className="text-sm text-muted-foreground">
-										Error loading members
-									</p>
+									<div className="flex items-center gap-2">
+										<AlertCircle className="h-4 w-4 text-destructive" />
+										<p className="text-sm text-destructive">
+											Error loading members
+										</p>
+									</div>
 								) : members.length > 0 ? (
-									<div className="flex -space-x-2">
+									<div className="flex -space-x-2 hover:space-x-1 transition-all duration-200">
 										{members.slice(0, 5).map((member) => (
 											<Avatar
 												key={member.publicId}
-												className="h-8 w-8 border-2 border-background"
+												className="h-8 w-8 border-2 border-background hover:z-10 hover:scale-110 transition-transform duration-200 cursor-pointer"
+												title={`${member.firstName} ${member.lastName}`}
 											>
 												<AvatarImage
 													src={member.image || "/placeholder-user.jpg"}
 													alt={`${member.firstName} ${member.lastName}`}
 												/>
-												<AvatarFallback>
-													{member.firstName[0]}
-													{member.lastName[0]}
+												<AvatarFallback className="text-xs">
+													{member.firstName?.[0]?.toUpperCase()}
+													{member.lastName?.[0]?.toUpperCase()}
 												</AvatarFallback>
 											</Avatar>
 										))}
 										{members.length > 5 && (
-											<div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium">
+											<div
+												className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium hover:z-10 hover:scale-110 transition-transform duration-200 cursor-pointer"
+												title={`+${members.length - 5} more members`}
+											>
 												+{members.length - 5}
 											</div>
 										)}
 									</div>
 								) : (
-									<p className="text-sm text-muted-foreground">No members</p>
+									<p className="text-sm text-muted-foreground italic">
+										No members yet
+									</p>
 								)}
 							</div>
 						</div>
-						<div className="h-full">
-							<MemberSelector
-								userIcon={<Plus className="" />}
-								label={"Add members"}
-								members={organizationMembers || []}
-								isLoading={false}
-								onChange={(id) => console.log("Selected member:", id)}
-							/>
+						<div className="flex items-center gap-2">
+							{hasErrorOrgMembers ? (
+								<Button
+									variant="outline"
+									size="sm"
+									className="h-8"
+									onClick={handleRetryFetch}
+								>
+									<AlertCircle className="h-4 w-4 mr-2" />
+									Retry
+								</Button>
+							) : (
+								<MemberSelector
+									userIcon={<Plus className="h-4 w-4" />}
+									label="Add members"
+									members={organizationMembers}
+									isLoading={isLoadingOrgMembers}
+									onChange={handleAddMember}
+								/>
+							)}
 						</div>
 					</div>
 
