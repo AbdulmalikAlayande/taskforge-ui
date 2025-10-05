@@ -21,7 +21,11 @@ import DatePicker from "@src/components/ui/date-picker";
 import { Separator } from "@src/components/ui/separator";
 import { useState } from "react";
 import { Button } from "@src/components/ui/button";
-import { OrganizationResponse, ProjectResponse } from "@src/lib/response-types";
+import {
+	MemberResponse,
+	OrganizationResponse,
+	ProjectResponse,
+} from "@src/lib/response-types";
 import { toast } from "sonner";
 import { useApiClient } from "@src/app/hooks/useApiClient";
 import Logger from "@src/lib/logger";
