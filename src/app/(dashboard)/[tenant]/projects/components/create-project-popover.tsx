@@ -150,8 +150,8 @@ const CreateProjectPopover: React.FC<{
 				setEndDate(undefined);
 
 				setDialogOpen(false);
-				// Optionally, you can also refresh the project list or redirect to the new project page
-				// window.location.href = `/projects/${response.id}`;
+				/*TODO: I think I should refresh the project list or redirect to the new project page
+				 like: window.location.href = `/projects/${response.id}`;*/
 			})
 			.catch((error) => {
 				Logger.error("Failed to create project:", { error });
