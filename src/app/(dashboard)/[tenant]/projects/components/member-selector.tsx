@@ -66,13 +66,36 @@ export function MemberSelector({
 		);
 	}
 
+	function handleCheckChange(member: MemberResponse): void {
+		setSelectedMembers((prev) => {
+			if (prev.some((m) => m.id === member.publicId)) {
+				return prev.filter((m) => m.id !== member.publicId);
+			} else {
+				const newMember: MemberSelectorOption = {
+					id: member.publicId,
+					name: `${member.firstName} ${member.lastName}`,
+					icon: member.image ? (
+						<Image
+							src={member.image}
+							alt={`${member.firstName} ${member.lastName}`}
+							width={24}
+							height={24}
+							className="rounded-full"
+						/>
+					) : (
+						MoreHorizontal
+					),
+					value: member.publicId,
+				};
+				return [...prev, newMember];
+			}
+		});
+	}
+
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
 				<Button variant="outline" size="sm" className="h-6 gap-2 p-0">
-					{/* className={
- 
-					*/}
 					<span
 						className={
 							isMobile
