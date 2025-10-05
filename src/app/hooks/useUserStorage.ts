@@ -1,4 +1,4 @@
-import { UserResponse } from "@src/lib/response-types";
+import { MemberResponse } from "@src/lib/response-types";
 import { useCallback } from "react";
 
 interface StoredUserData {
