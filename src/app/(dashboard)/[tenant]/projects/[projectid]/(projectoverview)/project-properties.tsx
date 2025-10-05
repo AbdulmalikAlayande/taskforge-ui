@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import { useUserStorage } from "@src/app/hooks/useUserStorage";
 import { MemberResponse } from "@src/lib/response-types";
+import { useApiClient } from "@src/app/hooks/useApiClient";
 
 type Member = {
 	publicId: string;
