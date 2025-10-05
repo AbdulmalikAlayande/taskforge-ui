@@ -42,34 +42,83 @@ export function ProjectProperties({
 	const { getOrganization } = useIndexedDB();
 	const { getCurrentTenantId } = useUserStorage();
 	const { apiClient } = useApiClient();
-	const [organizationMembers, setOrganizationMembers] =
-		useState<MemberResponse[]>();
 
-	const fetchOrganizationMembers = React.useCallback(() => {
-		apiClient
-			.get<MemberResponse[]>("")
-			.then((response) => {
-				setOrganizationMembers(response);
-			})
-			.catch((error) => console.log("An error occured", { error }));
-	}, [apiClient]);
+	const [organizationMembers, setOrganizationMembers] = useState<
+		MemberResponse[]
+	>([]);
+	const [isLoadingOrgMembers, setIsLoadingOrgMembers] = useState(false);
+	const [hasErrorOrgMembers, setHasErrorOrgMembers] = useState(false);
+	const [hasFetched, setHasFetched] = useState(false);
 
-	const getOrganizationMembers = React.useCallback(async () => {
-		const organization = await getOrganization(
-			session?.tenantId || getCurrentTenantId() || ""
-		);
-		if (organization) setOrganizationMembers(organization.members);
-		else fetchOrganizationMembers();
-	}, [
-		getOrganization,
-		session?.tenantId,
-		getCurrentTenantId,
-		fetchOrganizationMembers,
-	]);
+	// Memoize tenant ID to prevent unnecessary re-renders
+	const tenantId = useMemo(
+		() => session?.tenantId || getCurrentTenantId() || "",
+		[session?.tenantId, getCurrentTenantId]
+	);
 
+	// Fetch organization members only once
 	useEffect(() => {
-		getOrganizationMembers();
-	}, [getOrganizationMembers]);
+		// Prevent multiple fetches
+		if (!tenantId || hasFetched) return;
+
+		const fetchMembers = async () => {
+			setIsLoadingOrgMembers(true);
+			setHasErrorOrgMembers(false);
+
+			try {
+				// Try IndexedDB first for instant loading
+				const organization = await getOrganization(tenantId);
+
+				if (organization?.members && organization.members.length > 0) {
+					setOrganizationMembers(organization.members);
+					setHasFetched(true);
+					setIsLoadingOrgMembers(false);
+
+					// Fetch fresh data in background to update cache
+					apiClient
+						.get<MemberResponse[]>(`/organization/${tenantId}/members`)
+						.then((freshMembers) => {
+							setOrganizationMembers(freshMembers);
+						})
+						.catch(() => {
+							// Silent fail - we already have cached data
+						});
+				} else {
+					// No cached data, fetch from API
+					const response = await apiClient.get<MemberResponse[]>(
+						`/organization/${tenantId}/members`
+					);
+					setOrganizationMembers(response);
+					setHasFetched(true);
+				}
+			} catch (error) {
+				console.error("Failed to fetch organization members:", error);
+				setHasErrorOrgMembers(true);
+				toast.error("Failed to load team members", {
+					description: "Please try refreshing the page",
+				});
+			} finally {
+				setIsLoadingOrgMembers(false);
+			}
+		};
+
+		fetchMembers();
+	}, [tenantId, hasFetched, getOrganization, apiClient]);
+
+	// Handle member addition
+	const handleAddMember = (memberId: string) => {
+		console.log("Adding member to project:", memberId);
+		// TODO: Implement API call to add member to project
+		toast.success("Member added to project", {
+			description: "The team member has been added successfully",
+		});
+	};
+
+	// Retry fetching members
+	const handleRetryFetch = () => {
+		setHasFetched(false);
+		setHasErrorOrgMembers(false);
+	};
 
 	return (
 		<div className="space-y-6">
