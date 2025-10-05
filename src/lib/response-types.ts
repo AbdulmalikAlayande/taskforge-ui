@@ -112,6 +112,7 @@ export interface ProjectResponse {
 }
 
 export interface MemberResponse {
+	active: boolean;
 	publicId: string;
 	firstName: string;
 	lastName: string;
