@@ -12,7 +12,7 @@ interface StoredUserData {
 }
 
 export function useUserStorage() {
-	const storeUserData = useCallback((userData: UserResponse) => {
+	const storeUserData = useCallback((userData: MemberResponse) => {
 		const storageData: StoredUserData = {
 			publicId: userData.publicId,
 			email: userData.email,
