@@ -103,6 +103,7 @@ export interface ProjectResponse {
 	endDate: string;
 	organizationId: string;
 	memberIds: string[];
+	members: MemberResponse[];
 	status: ProjectStatus;
 	priority: ProjectPriority;
 	category: ProjectCategory;
