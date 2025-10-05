@@ -1,19 +1,26 @@
-import { useTenant } from "@src/components/tenant-provider";
-import { UserResponse } from "@src/lib/response-types";
+import { MemberResponse } from "@src/lib/response-types";
 import Image from "next/image";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@src/components/ui/popover";
-import { MoreHorizontal, Users2 } from "lucide-react";
+import { MoreHorizontal, User } from "lucide-react";
 import { Button } from "@src/components/ui/button";
-import React, { useEffect, useState } from "react";
-import { UnorderedList, ListItem } from "@src/components/ui/list";
+import React from "react";
 import { Checkbox } from "@src/components/ui/checkbox";
 import { useIsMobile } from "@src/app/hooks/use-mobile";
-import { useApiClient } from "@src/app/hooks/useApiClient";
 import { Spinner } from "@src/components/ui/spinner";
+import {
+	Command,
+	CommandEmpty,
+	CommandInput,
+	CommandItem,
+	CommandList,
+	CommandSeparator,
+	CommandShortcut,
+} from "@src/components/ui/command";
+import { Kbd } from "@src/components/ui/kbd";
 
 type MemberSelectorOption = {
 	id: string;
