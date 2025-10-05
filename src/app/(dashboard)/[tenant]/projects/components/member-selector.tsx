@@ -177,7 +177,7 @@ export function MemberSelector({
 										</span>
 										{getUserName(member)}
 									</span>
-									<span className="w-full h-fit text-xs text-start text-muted-foreground bg-red-200">
+									<span className="w-full h-fit text-xs text-start text-muted-foreground">
 										{member.email}
 									</span>
 								</span>
