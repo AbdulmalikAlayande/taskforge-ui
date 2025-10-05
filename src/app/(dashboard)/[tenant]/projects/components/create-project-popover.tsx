@@ -235,11 +235,14 @@ const CreateProjectPopover: React.FC<{
 							/>
 							<TeamLeadSelector
 								tenantId={tenantId}
-								members={organization.members}
+								members={teamMembers}
 								onChange={(id) => handleOptionClick(id, "lead")}
 							/>
 							<MemberSelector
-								members={organization.members}
+								userIcon={<Users2 />}
+								label="Members"
+								members={teamMembers}
+								isLoading={loadingTeamMembers}
 								onChange={(id) => handleOptionClick(id, "member")}
 							/>
 							<DatePicker
