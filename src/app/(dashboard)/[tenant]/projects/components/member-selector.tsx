@@ -31,41 +31,33 @@ type MemberSelectorOption = {
 };
 
 type MemberSelectorProps = {
+	userIcon: React.ReactNode;
+	label: string;
 	onChange: (id: string) => void;
-	members?: UserResponse[];
+	members: MemberResponse[];
+	isLoading: boolean;
 };
-export function MemberSelector({ onChange, members }: MemberSelectorProps) {
+export function MemberSelector({
+	userIcon,
+	label,
+	onChange,
+	members,
+	isLoading,
+}: MemberSelectorProps) {
 	const isMobile = useIsMobile();
-	const { tenantId } = useTenant();
 	const [selectedMembers, setSelectedMembers] = React.useState<
 		MemberSelectorOption[]
 	>([]);
 
-	const [teamMembers, setTeamMembers] = useState<UserResponse[]>([]);
-	const [loading, setLoading] = useState<boolean>(false);
-	const { apiClient } = useApiClient();
+	const getUserName = (member: MemberResponse): string => {
+		if (member.firstName && member.lastName)
+			return `${member.firstName} ${member.lastName}`;
+		else if (member.firstName && !member.lastName) return member.firstName;
+		else if (!member.firstName && member.lastName) return member.lastName;
+		else return "No Name";
+	};
 
-	const fetchMembers = React.useCallback(async () => {
-		setLoading(true);
-		try {
-			const response = await apiClient.get<UserResponse[]>(
-				`/organization/${tenantId}/members`
-			);
-			if (response && response.length > 0) setTeamMembers(response);
-		} finally {
-			setLoading(false);
-		}
-	}, [apiClient, tenantId]);
-
-	useEffect(() => {
-		if (members && members.length > 0) {
-			setTeamMembers(members);
-		} else {
-			fetchMembers();
-		}
-	}, [members, fetchMembers]);
-
-	if (loading || teamMembers.length === 0) {
+	if (isLoading) {
 		return (
 			<div className="w-full h-full flex flex-col justify-center items-center gap-2">
 				<Spinner variant="bars" className="text-accent-foreground" size={25} />
