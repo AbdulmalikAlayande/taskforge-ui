@@ -33,7 +33,7 @@ import {
 } from "@src/lib/response-types";
 import Logger from "@src/lib/logger";
 import { useApiClient } from "@src/app/hooks/useApiClient";
-import useIndexedDB from "@src/lib/useIndexedDB";
+import useIndexedDB from "@src/app/hooks/useIndexedDB";
 
 const organizationSchema = z.object({
 	name: z
