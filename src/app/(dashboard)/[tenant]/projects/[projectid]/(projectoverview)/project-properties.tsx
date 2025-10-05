@@ -35,17 +35,39 @@ export function ProjectProperties({
 	tags = [],
 	team,
 }: ProjectPropertiesProps) {
+	const { data: session } = useSession();
+	const { getOrganization } = useIndexedDB();
+	const { getCurrentTenantId } = useUserStorage();
+	const [organizationMembers, setOrganizationMembers] =
+		useState<MemberResponse[]>();
+
+	const fetchOrganizationMembers = () => {
+		return [];
+	};
+
+	const getOrganizationMembers = React.useCallback(async () => {
+		const organization = await getOrganization(
+			session?.tenantId || getCurrentTenantId() || ""
+		);
+		if (organization) setOrganizationMembers(organization.members);
+		else fetchOrganizationMembers();
+	}, [getOrganization, session?.tenantId, getCurrentTenantId]);
+
+	useEffect(() => {
+		getOrganizationMembers();
+	}, [getOrganizationMembers]);
+
 	return (
 		<div className="space-y-6">
 			<div>
 				<h3 className="mb-3 text-sm font-medium">Project Properties</h3>
 				<div className="space-y-4">
 					{/* Members */}
-					<div className="flex items-start gap-3">
-						<div className="flex h-5 w-5 items-center justify-center">
+					<div className="flex items-start gap-3 bg-green-400">
+						<div className="flex h-5 w-5 items-center justify-center bg-yellow-400">
 							<Users className="h-4 w-4 text-muted-foreground" />
 						</div>
-						<div className="flex-1 space-y-2">
+						<div className="flex-1 space-y-2 bg-blue-400">
 							<p className="text-sm text-muted-foreground">Members</p>
 							<div className="flex items-center gap-2">
 								{isLoadingMembers ? (
