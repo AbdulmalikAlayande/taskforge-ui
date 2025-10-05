@@ -1,7 +1,13 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@src/components/ui/avatar";
 import { Badge } from "@src/components/ui/badge";
 import { Skeleton } from "@src/components/ui/skeleton";
-import { Calendar, Users, Tag } from "lucide-react";
+import { Calendar, Users, Tag, Plus } from "lucide-react";
+import { MemberSelector } from "../../components/member-selector";
+import useIndexedDB from "@src/app/hooks/useIndexedDB";
+import { useSession } from "next-auth/react";
+import React, { useEffect, useState } from "react";
+import { useUserStorage } from "@src/app/hooks/useUserStorage";
+import { MemberResponse } from "@src/lib/response-types";
 
 type Member = {
 	publicId: string;
