@@ -138,7 +138,6 @@ export interface TaskResponse {
 	completedAt: string;
 	dueDate: string;
 	startDate: string;
-
 	status: TaskStatus;
 	priority: TaskPriority;
 	category: TaskCategory;
