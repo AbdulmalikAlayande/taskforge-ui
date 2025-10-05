@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Logger from "@src/lib/logger";
 import { useApiClient } from "@src/app/hooks/useApiClient";
 import { OrganizationResponse } from "@src/lib/response-types";
-import useIndexedDB from "@src/lib/useIndexedDB";
+import useIndexedDB from "@src/app/hooks/useIndexedDB";
 
 interface TenantContextType {
 	tenantId: string;
