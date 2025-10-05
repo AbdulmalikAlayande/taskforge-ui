@@ -63,11 +63,11 @@ export function ProjectProperties({
 				<h3 className="mb-3 text-sm font-medium">Project Properties</h3>
 				<div className="space-y-4">
 					{/* Members */}
-					<div className="flex items-start gap-3 bg-green-400">
-						<div className="flex h-5 w-5 items-center justify-center bg-yellow-400">
+					<div className="flex items-start gap-3">
+						<div className="flex h-5 w-5 items-center justify-center">
 							<Users className="h-4 w-4 text-muted-foreground" />
 						</div>
-						<div className="flex-1 space-y-2 bg-blue-400">
+						<div className="flex-1 space-y-2">
 							<p className="text-sm text-muted-foreground">Members</p>
 							<div className="flex items-center gap-2">
 								{isLoadingMembers ? (
@@ -108,7 +108,7 @@ export function ProjectProperties({
 								)}
 							</div>
 						</div>
-						<div className="h-full bg-red-400">
+						<div className="h-full">
 							<MemberSelector
 								userIcon={<Plus className="" />}
 								label={"Add members"}
