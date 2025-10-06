@@ -41,7 +41,27 @@ export default function RootLayout({
 							disableTransitionOnChange
 						>
 							{children}
-							<Toaster />
+							<Toaster
+								position="top-center"
+								expand={true}
+								richColors={true}
+								closeButton={true}
+								duration={5000}
+								toastOptions={{
+									classNames: {
+										toast: "group toast group-[.toaster]:shadow-lg",
+										title: "group-[.toast]:font-semibold",
+										description:
+											"group-[.toast]:text-sm group-[.toast]:opacity-90",
+										actionButton:
+											"group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
+										cancelButton:
+											"group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
+										closeButton:
+											"group-[.toast]:bg-muted group-[.toast]:hover:bg-muted/80",
+									},
+								}}
+							/>
 						</ThemeProvider>
 					</QueryProvider>
 				</AuthProvider>
