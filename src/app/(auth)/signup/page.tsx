@@ -16,15 +16,43 @@ export default function SignupPage() {
 	useEffect(() => {
 		if (hasShownToast.current) return;
 		const timer = setTimeout(() => {
-			toast.info("Development Note", {
+			toast.info("🚧 Development Notice", {
 				description:
-					"In case you encounter any error using Google or Github signup!, please use the normal signup method. The app is still in development phase.",
-				position: "top-right",
-				duration: 15_000,
+					"Google & GitHub signup may have issues. Please use the email signup method for the best experience. We're working on OAuth stability!",
+				position: "top-center",
+				duration: 20_000,
 				closeButton: true,
+				dismissible: true,
+				className: "group",
+				classNames: {
+					toast:
+						"group-[.toaster]:bg-gradient-to-r group-[.toaster]:from-blue-50 group-[.toaster]:to-indigo-50 dark:group-[.toaster]:from-blue-950 dark:group-[.toaster]:to-indigo-950 group-[.toaster]:border-2 group-[.toaster]:border-blue-200 dark:group-[.toaster]:border-blue-800 group-[.toaster]:shadow-xl group-[.toaster]:backdrop-blur-sm",
+					title:
+						"group-[.toast]:text-blue-900 dark:group-[.toast]:text-blue-100 group-[.toast]:font-bold group-[.toast]:text-base",
+					description:
+						"group-[.toast]:text-blue-800 dark:group-[.toast]:text-blue-200 group-[.toast]:text-sm group-[.toast]:leading-relaxed",
+					actionButton:
+						"group-[.toast]:bg-blue-600 group-[.toast]:text-white group-[.toast]:hover:bg-blue-700",
+					closeButton:
+						"group-[.toast]:bg-blue-100 dark:group-[.toast]:bg-blue-900 group-[.toast]:hover:bg-blue-200 dark:group-[.toast]:hover:bg-blue-800 group-[.toast]:border-blue-300 dark:group-[.toast]:border-blue-700",
+					icon: "group-[.toast]:text-blue-600 dark:group-[.toast]:text-blue-400",
+				},
+				style: {
+					minWidth: "380px",
+					maxWidth: "500px",
+					padding: "16px",
+				},
+				action: {
+					label: "Got it! 👍",
+					onClick: () => {
+						toast.success("Thanks for understanding!", {
+							duration: 2000,
+						});
+					},
+				},
 			});
 			hasShownToast.current = true;
-		}, 2000);
+		}, 1500);
 
 		return () => clearTimeout(timer);
 	}, []);
