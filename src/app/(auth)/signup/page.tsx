@@ -5,11 +5,30 @@ import { SignupForm } from "./signup-form";
 import { ModeToggle } from "@src/components/theme-toggle";
 import Link from "next/link";
 import { TypographyH3 } from "@src/components/ui/typography";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { UserResponse } from "@src/lib/response-types";
+import { toast } from "sonner";
 
 export default function SignupPage() {
 	const [signupResponse, setSignupResponse] = useState<UserResponse>();
+	const hasShownToast = useRef(false);
+
+	useEffect(() => {
+		if (hasShownToast.current) return;
+		const timer = setTimeout(() => {
+			toast.info("Development Note", {
+				description:
+					"In case you encounter any error using Google or Github signup!, please use the normal signup method. The app is still in development phase.",
+				position: "top-right",
+				duration: 15_000,
+				closeButton: true,
+			});
+			hasShownToast.current = true;
+		}, 2000);
+
+		return () => clearTimeout(timer);
+	}, []);
+
 	return (
 		<div className="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-2">
 			<nav className="w-full flex items-center justify-end">
